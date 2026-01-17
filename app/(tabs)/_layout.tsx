@@ -1,33 +1,66 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { BookOpen, Building2, CreditCard, FileText, Globe, GraduationCap, Home } from 'lucide-react-native';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarStyle: {
+          backgroundColor: '#111827',
+          borderTopColor: '#374151',
+        },
+        tabBarActiveTintColor: '#8b5cf6',
+        tabBarInactiveTintColor: '#9ca3af',
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+      }}
+    >
       <Tabs.Screen
-        name="index"
+        name="index"  // This will be app/(tabs)/index.tsx
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ size, color }) => <Home size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="countries"  // This will be app/(tabs)/countries.tsx
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Countries',
+          tabBarIcon: ({ size, color }) => <Globe size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="universities"  // This will be app/(tabs)/universities.tsx
+        options={{
+          title: 'Universities',
+          tabBarIcon: ({ size, color }) => <GraduationCap size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="courses"  // This will be app/(tabs)/courses.tsx
+        options={{
+          title: 'Courses',
+          tabBarIcon: ({ size, color }) => <BookOpen size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="documents"  // This will be app/(tabs)/documents.tsx
+        options={{
+          title: 'Documents',
+          tabBarIcon: ({ size, color }) => <FileText size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="payments"  // This will be app/(tabs)/payments.tsx
+        options={{
+          title: 'Payments',
+          tabBarIcon: ({ size, color }) => <CreditCard size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="branches"  // This will be app/(tabs)/branches.tsx
+        options={{
+          title: 'Branches',
+          tabBarIcon: ({ size, color }) => <Building2 size={size} color={color} />,
         }}
       />
     </Tabs>
