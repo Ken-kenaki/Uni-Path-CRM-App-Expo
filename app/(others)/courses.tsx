@@ -21,9 +21,15 @@ import {
     RefreshCw,
     Search,
     Trash2,
-    X
+    X,
 } from "lucide-react-native";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
     Alert,
     Dimensions,
@@ -34,7 +40,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from "react-native";
 import Animated, {
     FadeIn,
@@ -51,7 +57,7 @@ const { width } = Dimensions.get("window");
 interface Course {
   $id: string;
   name: string;
-  level?: 'undergraduate' | 'postgraduate' | 'diploma' | 'certificate' | 'phd';
+  level?: "undergraduate" | "postgraduate" | "diploma" | "certificate" | "phd";
   duration?: string;
   tuitionFee?: number;
   intakeMonths?: string[];
@@ -73,16 +79,26 @@ interface University {
 }
 
 const LEVEL_OPTIONS = [
-  { value: 'undergraduate', label: 'Undergraduate' },
-  { value: 'postgraduate', label: 'Postgraduate' },
-  { value: 'diploma', label: 'Diploma' },
-  { value: 'certificate', label: 'Certificate' },
-  { value: 'phd', label: 'PhD' }
+  { value: "undergraduate", label: "Undergraduate" },
+  { value: "postgraduate", label: "Postgraduate" },
+  { value: "diploma", label: "Diploma" },
+  { value: "certificate", label: "Certificate" },
+  { value: "phd", label: "PhD" },
 ];
 
 const MONTH_OPTIONS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 export default function CoursesPage() {
@@ -96,12 +112,17 @@ export default function CoursesPage() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [theme, setTheme] = useState<Theme>("dark");
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
-  
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error" | "info";
+  } | null>(null);
+
   // Pagination and filtering states
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [filterType, setFilterType] = useState<"all" | "system" | "custom">("all");
+  const [filterType, setFilterType] = useState<"all" | "system" | "custom">(
+    "all",
+  );
   const [selectedUniversity, setSelectedUniversity] = useState<string>("all");
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -110,15 +131,18 @@ export default function CoursesPage() {
   const flatListRef = useRef<FlatList>(null);
   const currentTheme = themeConfigs[theme];
 
-  const showToast = useCallback((message: string, type: "success" | "error" | "info") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
-    Haptics.notificationAsync(
-      type === "success" 
-        ? Haptics.NotificationFeedbackType.Success
-        : Haptics.NotificationFeedbackType.Error
-    );
-  }, []);
+  const showToast = useCallback(
+    (message: string, type: "success" | "error" | "info") => {
+      setToast({ message, type });
+      setTimeout(() => setToast(null), 4000);
+      Haptics.notificationAsync(
+        type === "success"
+          ? Haptics.NotificationFeedbackType.Success
+          : Haptics.NotificationFeedbackType.Error,
+      );
+    },
+    [],
+  );
 
   const fetchUniversities = useCallback(async () => {
     try {
@@ -136,38 +160,43 @@ export default function CoursesPage() {
     }
   }, [showToast]);
 
-  const fetchCourses = useCallback(async (page = 1, search = searchQuery) => {
-    try {
-      setLoading(true);
+  const fetchCourses = useCallback(
+    async (page = 1, search = searchQuery) => {
+      try {
+        setLoading(true);
 
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: "10",
-        ...(search && { search }),
-        ...(selectedUniversity !== "all" && { universityId: selectedUniversity }),
-        ...(selectedLevel !== "all" && { level: selectedLevel }),
-        ...(filterType !== "all" && { type: filterType }),
-      });
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: "10",
+          ...(search && { search }),
+          ...(selectedUniversity !== "all" && {
+            universityId: selectedUniversity,
+          }),
+          ...(selectedLevel !== "all" && { level: selectedLevel }),
+          ...(filterType !== "all" && { type: filterType }),
+        });
 
-      const response = await fetch(`${API_URL}/dashboard/courses?${params}`);
-      const result = await response.json();
+        const response = await fetch(`${API_URL}/dashboard/courses?${params}`);
+        const result = await response.json();
 
-      if (result.success) {
-        setCourses(result.data?.documents || []);
-        setTotalPages(result.data?.totalPages || 1);
-        setCurrentPage(page);
-      } else {
-        showToast("Failed to fetch courses", "error");
+        if (result.success) {
+          setCourses(result.data?.documents || []);
+          setTotalPages(result.data?.totalPages || 1);
+          setCurrentPage(page);
+        } else {
+          showToast("Failed to fetch courses", "error");
+          setCourses([]);
+        }
+      } catch (error) {
+        showToast("Error fetching courses", "error");
         setCourses([]);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-    } catch (error) {
-      showToast("Error fetching courses", "error");
-      setCourses([]);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [showToast, selectedUniversity, selectedLevel, filterType, searchQuery]);
+    },
+    [showToast, selectedUniversity, selectedLevel, filterType, searchQuery],
+  );
 
   useEffect(() => {
     fetchCourses(1);
@@ -196,7 +225,9 @@ export default function CoursesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          tuitionFee: formData.tuitionFee ? parseInt(formData.tuitionFee) : undefined,
+          tuitionFee: formData.tuitionFee
+            ? parseInt(formData.tuitionFee)
+            : undefined,
         }),
       });
       const result = await response.json();
@@ -225,14 +256,19 @@ export default function CoursesPage() {
   const updateCourse = async () => {
     if (!selectedCourse) return;
     try {
-      const response = await fetch(`${API_URL}/dashboard/courses/${selectedCourse.$id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          tuitionFee: formData.tuitionFee ? parseInt(formData.tuitionFee) : undefined,
-        }),
-      });
+      const response = await fetch(
+        `${API_URL}/dashboard/courses/${selectedCourse.$id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            tuitionFee: formData.tuitionFee
+              ? parseInt(formData.tuitionFee)
+              : undefined,
+          }),
+        },
+      );
       const result = await response.json();
 
       if (result.success) {
@@ -268,9 +304,12 @@ export default function CoursesPage() {
           style: "destructive",
           onPress: async () => {
             try {
-              const response = await fetch(`${API_URL}/dashboard/courses/${courseId}`, {
-                method: "DELETE",
-              });
+              const response = await fetch(
+                `${API_URL}/dashboard/courses/${courseId}`,
+                {
+                  method: "DELETE",
+                },
+              );
               const result = await response.json();
 
               if (result.success) {
@@ -285,7 +324,7 @@ export default function CoursesPage() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -304,24 +343,27 @@ export default function CoursesPage() {
     setActionMenuOpen(null);
   }, []);
 
-  const openEditModal = useCallback((course: Course) => {
-    if (course.isSystem) {
-      showToast("Cannot edit system courses", "error");
-      return;
-    }
-    setSelectedCourse(course);
-    setFormData({
-      name: course.name,
-      level: course.level || "",
-      duration: course.duration || "",
-      tuitionFee: course.tuitionFee?.toString() || "",
-      intakeMonths: course.intakeMonths || [],
-      description: course.description || "",
-      universities: course.universities,
-    });
-    setShowEditModal(true);
-    setActionMenuOpen(null);
-  }, [showToast]);
+  const openEditModal = useCallback(
+    (course: Course) => {
+      if (course.isSystem) {
+        showToast("Cannot edit system courses", "error");
+        return;
+      }
+      setSelectedCourse(course);
+      setFormData({
+        name: course.name,
+        level: course.level || "",
+        duration: course.duration || "",
+        tuitionFee: course.tuitionFee?.toString() || "",
+        intakeMonths: course.intakeMonths || [],
+        description: course.description || "",
+        universities: course.universities,
+      });
+      setShowEditModal(true);
+      setActionMenuOpen(null);
+    },
+    [showToast],
+  );
 
   const closeModals = useCallback(() => {
     setShowCreateModal(false);
@@ -339,7 +381,7 @@ export default function CoursesPage() {
   }, []);
 
   const handleActionMenuToggle = useCallback((courseId: string) => {
-    setActionMenuOpen(prev => prev === courseId ? null : courseId);
+    setActionMenuOpen((prev) => (prev === courseId ? null : courseId));
   }, []);
 
   const formatDate = useCallback((dateString: string) => {
@@ -351,9 +393,9 @@ export default function CoursesPage() {
   }, []);
 
   const formatCurrency = useCallback((amount: number) => {
-    return new Intl.NumberFormat('en-NP', {
-      style: 'currency',
-      currency: 'NPR',
+    return new Intl.NumberFormat("en-NP", {
+      style: "currency",
+      currency: "NPR",
       minimumFractionDigits: 0,
     }).format(amount);
   }, []);
@@ -362,7 +404,9 @@ export default function CoursesPage() {
     const total = courses.length;
     const system = courses.filter((c) => c.isSystem).length;
     const custom = courses.filter((c) => !c.isSystem).length;
-    const undergraduate = courses.filter((c) => c.level === 'undergraduate').length;
+    const undergraduate = courses.filter(
+      (c) => c.level === "undergraduate",
+    ).length;
 
     return { total, system, custom, undergraduate };
   }, [courses]);
@@ -373,7 +417,7 @@ export default function CoursesPage() {
     };
 
     return (
-      <Animated.View 
+      <Animated.View
         entering={ZoomIn.duration(300)}
         exiting={ZoomOut.duration(300)}
         className={`m-2 p-4 rounded-2xl ${currentTheme.card} border ${currentTheme.border}`}
@@ -385,8 +429,12 @@ export default function CoursesPage() {
             <BookOpen size={24} color="white" />
           </View>
           <View className="flex-row items-center">
-            <View className={`px-2 py-1 rounded-full mr-2 ${course.isSystem ? "bg-blue-100" : "bg-green-100"}`}>
-              <Text className={`text-xs font-medium ${course.isSystem ? "text-blue-600" : "text-green-600"}`}>
+            <View
+              className={`px-2 py-1 rounded-full mr-2 ${course.isSystem ? "bg-blue-100" : "bg-green-100"}`}
+            >
+              <Text
+                className={`text-xs font-medium ${course.isSystem ? "text-blue-600" : "text-green-600"}`}
+              >
                 {course.isSystem ? "System" : "Custom"}
               </Text>
             </View>
@@ -397,12 +445,18 @@ export default function CoursesPage() {
         </View>
 
         {/* Content */}
-        <Text className={`text-lg font-semibold ${currentTheme.text} mb-2`} numberOfLines={2}>
+        <Text
+          className={`text-lg font-semibold ${currentTheme.text} mb-2`}
+          numberOfLines={2}
+        >
           {course.name}
         </Text>
-        
+
         {course.description && (
-          <Text className={`text-sm ${currentTheme.textMuted} mb-3`} numberOfLines={2}>
+          <Text
+            className={`text-sm ${currentTheme.textMuted} mb-3`}
+            numberOfLines={2}
+          >
             {course.description}
           </Text>
         )}
@@ -412,21 +466,26 @@ export default function CoursesPage() {
           {course.university && (
             <View className="flex-row items-center">
               <Building size={16} color={currentTheme.textMuted} />
-              <Text className={`text-sm ${currentTheme.textMuted} ml-2 flex-1`} numberOfLines={1}>
+              <Text
+                className={`text-sm ${currentTheme.textMuted} ml-2 flex-1`}
+                numberOfLines={1}
+              >
                 {course.university.name}
               </Text>
             </View>
           )}
-          
+
           {course.level && (
             <View className="flex-row items-center">
               <GraduationCap size={16} color={currentTheme.textMuted} />
-              <Text className={`text-sm ${currentTheme.textMuted} ml-2 capitalize`}>
+              <Text
+                className={`text-sm ${currentTheme.textMuted} ml-2 capitalize`}
+              >
                 {course.level}
               </Text>
             </View>
           )}
-          
+
           {course.duration && (
             <View className="flex-row items-center">
               <Clock size={16} color={currentTheme.textMuted} />
@@ -435,7 +494,7 @@ export default function CoursesPage() {
               </Text>
             </View>
           )}
-          
+
           {course.tuitionFee && (
             <View className="flex-row items-center">
               <DollarSign size={16} color={currentTheme.textMuted} />
@@ -444,20 +503,25 @@ export default function CoursesPage() {
               </Text>
             </View>
           )}
-          
+
           {course.intakeMonths && course.intakeMonths.length > 0 && (
             <View className="flex-row items-center">
               <Calendar size={16} color={currentTheme.textMuted} />
-              <Text className={`text-sm ${currentTheme.textMuted} ml-2`} numberOfLines={1}>
-                {course.intakeMonths.slice(0, 2).join(', ')}
-                {course.intakeMonths.length > 2 ? '...' : ''}
+              <Text
+                className={`text-sm ${currentTheme.textMuted} ml-2`}
+                numberOfLines={1}
+              >
+                {course.intakeMonths.slice(0, 2).join(", ")}
+                {course.intakeMonths.length > 2 ? "..." : ""}
               </Text>
             </View>
           )}
         </View>
 
         {/* Footer */}
-        <View className={`flex-row justify-between items-center pt-4 border-t ${currentTheme.border}`}>
+        <View
+          className={`flex-row justify-between items-center pt-4 border-t ${currentTheme.border}`}
+        >
           <Text className={`text-xs ${currentTheme.textMuted}`}>
             Created {formatDate(course.$createdAt)}
           </Text>
@@ -468,14 +532,14 @@ export default function CoursesPage() {
 
         {/* Action Menu */}
         {actionMenuOpen === course.$id && (
-          <Animated.View 
+          <Animated.View
             entering={FadeIn.duration(200)}
             exiting={FadeOut.duration(200)}
             className="absolute right-2 top-12 z-10 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700"
           >
             {!course.isSystem && (
               <>
-                <TouchableOpacity 
+                <TouchableOpacity
                   className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-gray-700"
                   onPress={() => {
                     openEditModal(course);
@@ -485,8 +549,8 @@ export default function CoursesPage() {
                   <Edit size={16} color={currentTheme.text} />
                   <Text className={`ml-2 ${currentTheme.text}`}>Edit</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   className="flex-row items-center px-4 py-3"
                   onPress={() => {
                     deleteCourse(course.$id);
@@ -512,17 +576,23 @@ export default function CoursesPage() {
             <BookOpen size={20} color="white" />
           </View>
           <View className="flex-1">
-            <Text className={`font-medium ${currentTheme.text}`} numberOfLines={1}>
+            <Text
+              className={`font-medium ${currentTheme.text}`}
+              numberOfLines={1}
+            >
               {course.name}
             </Text>
             {course.description && (
-              <Text className={`text-xs ${currentTheme.textMuted}`} numberOfLines={1}>
+              <Text
+                className={`text-xs ${currentTheme.textMuted}`}
+                numberOfLines={1}
+              >
                 {course.description}
               </Text>
             )}
           </View>
         </View>
-        
+
         <View className="flex-row items-center">
           {course.university && (
             <View className="px-2 py-1 bg-blue-100 dark:bg-blue-500/10 rounded-full mr-2">
@@ -531,15 +601,22 @@ export default function CoursesPage() {
               </Text>
             </View>
           )}
-          
-          <View className={`px-2 py-1 rounded-full mr-2 ${course.isSystem ? "bg-blue-100" : "bg-green-100"}`}>
-            <Text className={`text-xs ${course.isSystem ? "text-blue-600" : "text-green-600"}`}>
+
+          <View
+            className={`px-2 py-1 rounded-full mr-2 ${course.isSystem ? "bg-blue-100" : "bg-green-100"}`}
+          >
+            <Text
+              className={`text-xs ${course.isSystem ? "text-blue-600" : "text-green-600"}`}
+            >
               {course.isSystem ? "System" : "Custom"}
             </Text>
           </View>
-          
+
           {!course.isSystem && (
-            <TouchableOpacity onPress={() => openEditModal(course)} className="p-2 mr-2">
+            <TouchableOpacity
+              onPress={() => openEditModal(course)}
+              className="p-2 mr-2"
+            >
               <Edit size={16} color={currentTheme.textMuted} />
             </TouchableOpacity>
           )}
@@ -567,7 +644,7 @@ export default function CoursesPage() {
             (page) =>
               page === 1 ||
               page === totalPages ||
-              (page >= currentPage - 1 && page <= currentPage + 1)
+              (page >= currentPage - 1 && page <= currentPage + 1),
           )
           .map((page, index, array) => (
             <View key={page} className="flex-row items-center">
@@ -582,7 +659,11 @@ export default function CoursesPage() {
                     : `${currentTheme.card} border ${currentTheme.border}`
                 }`}
               >
-                <Text className={currentPage === page ? "text-white" : currentTheme.text}>
+                <Text
+                  className={
+                    currentPage === page ? "text-white" : currentTheme.text
+                  }
+                >
                   {page}
                 </Text>
               </TouchableOpacity>
@@ -605,10 +686,18 @@ export default function CoursesPage() {
 
   if (loading && courses.length === 0) {
     return (
-      <SafeAreaView className={`flex-1 ${currentTheme.background} items-center justify-center`}>
+      <SafeAreaView
+        className={`flex-1 ${currentTheme.background} items-center justify-center`}
+      >
         <View className="items-center">
-          <RefreshCw size={32} color={currentTheme.primary} className="animate-spin" />
-          <Text className={`mt-4 ${currentTheme.text}`}>Loading courses...</Text>
+          <RefreshCw
+            size={32}
+            color={currentTheme.primary}
+            className="animate-spin"
+          />
+          <Text className={`mt-4 ${currentTheme.text}`}>
+            Loading courses...
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -618,20 +707,24 @@ export default function CoursesPage() {
     <SafeAreaView className={`flex-1 ${currentTheme.background}`}>
       {/* Toast Notification */}
       {toast && (
-        <Animated.View 
+        <Animated.View
           entering={SlideInDown.duration(300)}
           exiting={SlideOutDown.duration(200)}
           className="absolute top-4 left-4 right-4 z-50"
         >
           <LinearGradient
             colors={
-              toast.type === "success" ? ["#10b981", "#059669"] :
-              toast.type === "error" ? ["#ef4444", "#dc2626"] :
-              ["#3b82f6", "#2563eb"]
+              toast.type === "success"
+                ? ["#10b981", "#059669"]
+                : toast.type === "error"
+                  ? ["#ef4444", "#dc2626"]
+                  : ["#3b82f6", "#2563eb"]
             }
             className="rounded-xl px-6 py-4 flex-row items-center justify-between shadow-2xl"
           >
-            <Text className="text-white font-medium flex-1">{toast.message}</Text>
+            <Text className="text-white font-medium flex-1">
+              {toast.message}
+            </Text>
             <TouchableOpacity onPress={() => setToast(null)}>
               <X size={20} color="white" />
             </TouchableOpacity>
@@ -643,7 +736,9 @@ export default function CoursesPage() {
       <View className="p-4">
         <View className="flex-row justify-between items-center mb-4">
           <View>
-            <Text className={`text-2xl font-bold ${currentTheme.text}`}>Courses</Text>
+            <Text className={`text-2xl font-bold ${currentTheme.text}`}>
+              Courses
+            </Text>
             <View className="flex-row mt-2 space-x-2">
               <View className="px-3 py-1 bg-purple-100 dark:bg-purple-500/10 rounded-full">
                 <Text className="text-purple-600 dark:text-purple-400 text-xs font-medium">
@@ -662,7 +757,7 @@ export default function CoursesPage() {
               </View>
             </View>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={openCreateModal}
             className="bg-gradient-to-r from-purple-600 to-purple-500 px-4 py-3 rounded-xl flex-row items-center"
           >
@@ -674,7 +769,11 @@ export default function CoursesPage() {
         {/* Search and Filters */}
         <View className="space-y-3">
           <View className="relative">
-            <Search size={20} color={currentTheme.textMuted} className="absolute left-3 top-3 z-10" />
+            <Search
+              size={20}
+              color={currentTheme.textMuted}
+              className="absolute left-3 top-3 z-10"
+            />
             <TextInput
               placeholder="Search courses..."
               placeholderTextColor={currentTheme.textMuted}
@@ -683,7 +782,7 @@ export default function CoursesPage() {
               className={`pl-10 pr-4 py-3 ${currentTheme.card} rounded-xl border ${currentTheme.border} ${currentTheme.text}`}
             />
             {searchQuery ? (
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setSearchQuery("")}
                 className="absolute right-3 top-3"
               >
@@ -693,13 +792,23 @@ export default function CoursesPage() {
           </View>
 
           <View className="flex-row space-x-2">
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-1">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="flex-1"
+            >
               <View className="flex-row space-x-2">
                 <TouchableOpacity
                   onPress={() => setFilterType("all")}
                   className={`px-4 py-2 rounded-full ${filterType === "all" ? "bg-purple-100 dark:bg-purple-600" : currentTheme.card}`}
                 >
-                  <Text className={filterType === "all" ? "text-purple-700 dark:text-white" : currentTheme.text}>
+                  <Text
+                    className={
+                      filterType === "all"
+                        ? "text-purple-700 dark:text-white"
+                        : currentTheme.text
+                    }
+                  >
                     All
                   </Text>
                 </TouchableOpacity>
@@ -707,7 +816,13 @@ export default function CoursesPage() {
                   onPress={() => setFilterType("system")}
                   className={`px-4 py-2 rounded-full ${filterType === "system" ? "bg-blue-100 dark:bg-blue-600" : currentTheme.card}`}
                 >
-                  <Text className={filterType === "system" ? "text-blue-700 dark:text-white" : currentTheme.text}>
+                  <Text
+                    className={
+                      filterType === "system"
+                        ? "text-blue-700 dark:text-white"
+                        : currentTheme.text
+                    }
+                  >
                     System
                   </Text>
                 </TouchableOpacity>
@@ -715,7 +830,13 @@ export default function CoursesPage() {
                   onPress={() => setFilterType("custom")}
                   className={`px-4 py-2 rounded-full ${filterType === "custom" ? "bg-green-100 dark:bg-green-600" : currentTheme.card}`}
                 >
-                  <Text className={filterType === "custom" ? "text-green-700 dark:text-white" : currentTheme.text}>
+                  <Text
+                    className={
+                      filterType === "custom"
+                        ? "text-green-700 dark:text-white"
+                        : currentTheme.text
+                    }
+                  >
                     Custom
                   </Text>
                 </TouchableOpacity>
@@ -723,7 +844,9 @@ export default function CoursesPage() {
             </ScrollView>
 
             <TouchableOpacity
-              onPress={() => setViewMode(viewMode === "grid" ? "table" : "grid")}
+              onPress={() =>
+                setViewMode(viewMode === "grid" ? "table" : "grid")
+              }
               className="p-2 rounded-xl bg-white dark:bg-gray-800"
             >
               {viewMode === "grid" ? (
@@ -735,12 +858,22 @@ export default function CoursesPage() {
           </View>
 
           {/* University Filter */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="py-2">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="py-2"
+          >
             <TouchableOpacity
               onPress={() => setSelectedUniversity("all")}
               className={`px-4 py-2 mr-2 rounded-full ${selectedUniversity === "all" ? "bg-purple-100 dark:bg-purple-600" : currentTheme.card}`}
             >
-              <Text className={selectedUniversity === "all" ? "text-purple-700 dark:text-white" : currentTheme.text}>
+              <Text
+                className={
+                  selectedUniversity === "all"
+                    ? "text-purple-700 dark:text-white"
+                    : currentTheme.text
+                }
+              >
                 All Universities
               </Text>
             </TouchableOpacity>
@@ -750,7 +883,13 @@ export default function CoursesPage() {
                 onPress={() => setSelectedUniversity(university.$id)}
                 className={`px-4 py-2 mr-2 rounded-full ${selectedUniversity === university.$id ? "bg-blue-100 dark:bg-blue-600" : currentTheme.card}`}
               >
-                <Text className={selectedUniversity === university.$id ? "text-blue-700 dark:text-white" : currentTheme.text}>
+                <Text
+                  className={
+                    selectedUniversity === university.$id
+                      ? "text-blue-700 dark:text-white"
+                      : currentTheme.text
+                  }
+                >
                   {university.name}
                 </Text>
               </TouchableOpacity>
@@ -758,12 +897,22 @@ export default function CoursesPage() {
           </ScrollView>
 
           {/* Level Filter */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="py-2">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="py-2"
+          >
             <TouchableOpacity
               onPress={() => setSelectedLevel("all")}
               className={`px-4 py-2 mr-2 rounded-full ${selectedLevel === "all" ? "bg-purple-100 dark:bg-purple-600" : currentTheme.card}`}
             >
-              <Text className={selectedLevel === "all" ? "text-purple-700 dark:text-white" : currentTheme.text}>
+              <Text
+                className={
+                  selectedLevel === "all"
+                    ? "text-purple-700 dark:text-white"
+                    : currentTheme.text
+                }
+              >
                 All Levels
               </Text>
             </TouchableOpacity>
@@ -773,7 +922,13 @@ export default function CoursesPage() {
                 onPress={() => setSelectedLevel(level.value)}
                 className={`px-4 py-2 mr-2 rounded-full ${selectedLevel === level.value ? "bg-green-100 dark:bg-green-600" : currentTheme.card}`}
               >
-                <Text className={selectedLevel === level.value ? "text-green-700 dark:text-white" : currentTheme.text}>
+                <Text
+                  className={
+                    selectedLevel === level.value
+                      ? "text-green-700 dark:text-white"
+                      : currentTheme.text
+                  }
+                >
                   {level.label}
                 </Text>
               </TouchableOpacity>
@@ -789,8 +944,12 @@ export default function CoursesPage() {
         key={viewMode}
         keyExtractor={(item) => item.$id}
         numColumns={viewMode === "grid" ? 2 : 1}
-        renderItem={({ item }) => 
-          viewMode === "grid" ? <CourseCard course={item} /> : <TableRow course={item} />
+        renderItem={({ item }) =>
+          viewMode === "grid" ? (
+            <CourseCard course={item} />
+          ) : (
+            <TableRow course={item} />
+          )
         }
         refreshControl={
           <RefreshControl
@@ -807,7 +966,10 @@ export default function CoursesPage() {
               No courses found
             </Text>
             <Text className={`${currentTheme.textMuted} mt-2 text-center`}>
-              {searchQuery || selectedUniversity !== "all" || selectedLevel !== "all" || filterType !== "all"
+              {searchQuery ||
+              selectedUniversity !== "all" ||
+              selectedLevel !== "all" ||
+              filterType !== "all"
                 ? "No courses match your filters"
                 : "No courses available"}
             </Text>
@@ -825,7 +987,7 @@ export default function CoursesPage() {
         transparent={true}
       >
         <View className="flex-1 bg-black/50 justify-end">
-          <Animated.View 
+          <Animated.View
             entering={SlideInDown.duration(300)}
             exiting={SlideOutDown.duration(200)}
             className={`${currentTheme.card} rounded-t-3xl p-6 max-h-[90%]`}
@@ -842,27 +1004,48 @@ export default function CoursesPage() {
             <ScrollView showsVerticalScrollIndicator={false}>
               <View className="space-y-4">
                 <View>
-                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>Course Name *</Text>
+                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>
+                    Course Name *
+                  </Text>
                   <TextInput
                     placeholder="Enter course name"
                     placeholderTextColor={currentTheme.textMuted}
                     value={formData.name}
-                    onChangeText={(text) => setFormData({...formData, name: text})}
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, name: text })
+                    }
                     className={`px-4 py-3 rounded-xl border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                   />
                 </View>
 
                 <View>
-                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>University *</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pb-2">
+                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>
+                    University *
+                  </Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    className="pb-2"
+                  >
                     <View className="flex-row space-x-2">
                       {universities.map((university) => (
                         <TouchableOpacity
                           key={university.$id}
-                          onPress={() => setFormData({...formData, universities: university.$id})}
+                          onPress={() =>
+                            setFormData({
+                              ...formData,
+                              universities: university.$id,
+                            })
+                          }
                           className={`px-4 py-2 rounded-full ${formData.universities === university.$id ? "bg-purple-100 dark:bg-purple-600" : currentTheme.card}`}
                         >
-                          <Text className={formData.universities === university.$id ? "text-purple-700 dark:text-white" : currentTheme.text}>
+                          <Text
+                            className={
+                              formData.universities === university.$id
+                                ? "text-purple-700 dark:text-white"
+                                : currentTheme.text
+                            }
+                          >
                             {university.name}
                           </Text>
                         </TouchableOpacity>
@@ -872,16 +1055,30 @@ export default function CoursesPage() {
                 </View>
 
                 <View>
-                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>Level</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pb-2">
+                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>
+                    Level
+                  </Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    className="pb-2"
+                  >
                     <View className="flex-row space-x-2">
                       {LEVEL_OPTIONS.map((level) => (
                         <TouchableOpacity
                           key={level.value}
-                          onPress={() => setFormData({...formData, level: level.value})}
+                          onPress={() =>
+                            setFormData({ ...formData, level: level.value })
+                          }
                           className={`px-4 py-2 rounded-full ${formData.level === level.value ? "bg-green-100 dark:bg-green-600" : currentTheme.card}`}
                         >
-                          <Text className={formData.level === level.value ? "text-green-700 dark:text-white" : currentTheme.text}>
+                          <Text
+                            className={
+                              formData.level === level.value
+                                ? "text-green-700 dark:text-white"
+                                : currentTheme.text
+                            }
+                          >
                             {level.label}
                           </Text>
                         </TouchableOpacity>
@@ -892,22 +1089,30 @@ export default function CoursesPage() {
 
                 <View className="flex-row space-x-4">
                   <View className="flex-1">
-                    <Text className={`font-medium mb-2 ${currentTheme.text}`}>Duration</Text>
+                    <Text className={`font-medium mb-2 ${currentTheme.text}`}>
+                      Duration
+                    </Text>
                     <TextInput
                       placeholder="e.g., 4 years"
                       placeholderTextColor={currentTheme.textMuted}
                       value={formData.duration}
-                      onChangeText={(text) => setFormData({...formData, duration: text})}
+                      onChangeText={(text) =>
+                        setFormData({ ...formData, duration: text })
+                      }
                       className={`px-4 py-3 rounded-xl border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                     />
                   </View>
                   <View className="flex-1">
-                    <Text className={`font-medium mb-2 ${currentTheme.text}`}>Tuition Fee (NPR)</Text>
+                    <Text className={`font-medium mb-2 ${currentTheme.text}`}>
+                      Tuition Fee (NPR)
+                    </Text>
                     <TextInput
                       placeholder="e.g., 500000"
                       placeholderTextColor={currentTheme.textMuted}
                       value={formData.tuitionFee}
-                      onChangeText={(text) => setFormData({...formData, tuitionFee: text})}
+                      onChangeText={(text) =>
+                        setFormData({ ...formData, tuitionFee: text })
+                      }
                       keyboardType="numeric"
                       className={`px-4 py-3 rounded-xl border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                     />
@@ -915,16 +1120,22 @@ export default function CoursesPage() {
                 </View>
 
                 <View>
-                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>Intake Months</Text>
+                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>
+                    Intake Months
+                  </Text>
                   <View className="flex-row flex-wrap">
                     {MONTH_OPTIONS.map((month) => (
                       <TouchableOpacity
                         key={month}
                         onPress={() => {
-                          const newIntakeMonths = formData.intakeMonths.includes(month)
-                            ? formData.intakeMonths.filter(m => m !== month)
-                            : [...formData.intakeMonths, month];
-                          setFormData({...formData, intakeMonths: newIntakeMonths});
+                          const newIntakeMonths =
+                            formData.intakeMonths.includes(month)
+                              ? formData.intakeMonths.filter((m) => m !== month)
+                              : [...formData.intakeMonths, month];
+                          setFormData({
+                            ...formData,
+                            intakeMonths: newIntakeMonths,
+                          });
                         }}
                         className={`px-3 py-2 rounded-lg mr-2 mb-2 ${
                           formData.intakeMonths.includes(month)
@@ -932,11 +1143,13 @@ export default function CoursesPage() {
                             : currentTheme.card
                         } border ${currentTheme.border}`}
                       >
-                        <Text className={
-                          formData.intakeMonths.includes(month)
-                            ? "text-purple-700 dark:text-white"
-                            : currentTheme.text
-                        }>
+                        <Text
+                          className={
+                            formData.intakeMonths.includes(month)
+                              ? "text-purple-700 dark:text-white"
+                              : currentTheme.text
+                          }
+                        >
                           {month}
                         </Text>
                       </TouchableOpacity>
@@ -945,12 +1158,16 @@ export default function CoursesPage() {
                 </View>
 
                 <View>
-                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>Description</Text>
+                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>
+                    Description
+                  </Text>
                   <TextInput
                     placeholder="Enter course description (optional)"
                     placeholderTextColor={currentTheme.textMuted}
                     value={formData.description}
-                    onChangeText={(text) => setFormData({...formData, description: text})}
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, description: text })
+                    }
                     multiline
                     numberOfLines={4}
                     className={`px-4 py-3 rounded-xl border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}

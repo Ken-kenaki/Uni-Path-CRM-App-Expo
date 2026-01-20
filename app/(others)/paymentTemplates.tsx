@@ -22,9 +22,15 @@ import {
     Trash2,
     UserPlus,
     Users,
-    X
+    X,
 } from "lucide-react-native";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -36,19 +42,24 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from "react-native";
 import Animated, {
     SlideInDown,
     SlideOutDown,
     ZoomIn,
-    ZoomOut
+    ZoomOut,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
-type PaymentStatus = "pending" | "received" | "issued" | "failed" | "under_review";
+type PaymentStatus =
+  | "pending"
+  | "received"
+  | "issued"
+  | "failed"
+  | "under_review";
 type TabType = "templates" | "history";
 
 interface PaymentTemplate {
@@ -109,7 +120,13 @@ interface Student {
   firstName: string;
   lastName: string;
   email: string;
-  status: "new" | "pending" | "in_progress" | "qualified" | "completed" | "dropped";
+  status:
+    | "new"
+    | "pending"
+    | "in_progress"
+    | "qualified"
+    | "completed"
+    | "dropped";
   paymentTemplates?: string;
 }
 
@@ -130,12 +147,13 @@ export default function PaymentsManagement() {
     message: string;
     type: "success" | "error" | "info" | "warning";
   } | null>(null);
-  
+
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showTemplateEditModal, setShowTemplateEditModal] = useState(false);
   const [showAssignStudentModal, setShowAssignStudentModal] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<PaymentTemplate | null>(null);
-  
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<PaymentTemplate | null>(null);
+
   const [templateFormData, setTemplateFormData] = useState({
     templateName: "",
     items: [] as TemplateItem[],
@@ -149,21 +167,24 @@ export default function PaymentsManagement() {
   const currentTheme = themeConfigs[theme];
   const flatListRef = useRef<FlatList>(null);
 
-  const showToast = useCallback((message: string, type: "success" | "error" | "info" | "warning") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
-    Haptics.notificationAsync(
-      type === "success"
-        ? Haptics.NotificationFeedbackType.Success
-        : type === "error"
-        ? Haptics.NotificationFeedbackType.Error
-        : Haptics.NotificationFeedbackType.Warning
-    );
-  }, []);
+  const showToast = useCallback(
+    (message: string, type: "success" | "error" | "info" | "warning") => {
+      setToast({ message, type });
+      setTimeout(() => setToast(null), 4000);
+      Haptics.notificationAsync(
+        type === "success"
+          ? Haptics.NotificationFeedbackType.Success
+          : type === "error"
+            ? Haptics.NotificationFeedbackType.Error
+            : Haptics.NotificationFeedbackType.Warning,
+      );
+    },
+    [],
+  );
 
   const fetchTemplates = useCallback(async () => {
     try {
-      setLoading(prev => ({ ...prev, templates: true }));
+      setLoading((prev) => ({ ...prev, templates: true }));
       const response = await fetch(`${API_URL}/dashboard/paymentsTemplates`);
       const result = await response.json();
 
@@ -175,14 +196,14 @@ export default function PaymentsManagement() {
     } catch (error) {
       showToast("Error fetching payment templates", "error");
     } finally {
-      setLoading(prev => ({ ...prev, templates: false }));
+      setLoading((prev) => ({ ...prev, templates: false }));
       setRefreshing(false);
     }
   }, [showToast]);
 
   const fetchPayments = useCallback(async () => {
     try {
-      setLoading(prev => ({ ...prev, payments: true }));
+      setLoading((prev) => ({ ...prev, payments: true }));
       const response = await fetch(`${API_URL}/dashboard/payments`);
       const result = await response.json();
 
@@ -194,14 +215,16 @@ export default function PaymentsManagement() {
     } catch (error) {
       showToast("Error fetching payments", "error");
     } finally {
-      setLoading(prev => ({ ...prev, payments: false }));
+      setLoading((prev) => ({ ...prev, payments: false }));
     }
   }, [showToast]);
 
   const fetchStudents = useCallback(async () => {
     try {
-      setLoading(prev => ({ ...prev, students: true }));
-      const response = await fetch(`${API_URL}/dashboard/students?status=in_progress`);
+      setLoading((prev) => ({ ...prev, students: true }));
+      const response = await fetch(
+        `${API_URL}/dashboard/students?status=in_progress`,
+      );
       const result = await response.json();
 
       if (result.success) {
@@ -210,7 +233,7 @@ export default function PaymentsManagement() {
     } catch (error) {
       console.error("Error fetching students:", error);
     } finally {
-      setLoading(prev => ({ ...prev, students: false }));
+      setLoading((prev) => ({ ...prev, students: false }));
     }
   }, []);
 
@@ -261,7 +284,7 @@ export default function PaymentsManagement() {
 
   const updatePaymentTemplate = async () => {
     if (!selectedTemplate) return;
-    
+
     try {
       setIsUpdatingTemplate(true);
       const response = await fetch(
@@ -270,7 +293,7 @@ export default function PaymentsManagement() {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(templateFormData),
-        }
+        },
       );
 
       const result = await response.json();
@@ -305,7 +328,7 @@ export default function PaymentsManagement() {
                 `${API_URL}/dashboard/paymentsTemplates/${templateId}`,
                 {
                   method: "DELETE",
-                }
+                },
               );
 
               const result = await response.json();
@@ -320,11 +343,14 @@ export default function PaymentsManagement() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
-  const assignTemplateToStudent = async (studentId: string, templateId: string) => {
+  const assignTemplateToStudent = async (
+    studentId: string,
+    templateId: string,
+  ) => {
     try {
       setIsAssigningTemplate(true);
 
@@ -333,11 +359,11 @@ export default function PaymentsManagement() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            templateId, 
-            createPayments: true 
+          body: JSON.stringify({
+            templateId,
+            createPayments: true,
           }),
-        }
+        },
       );
 
       const result = await response.json();
@@ -373,17 +399,23 @@ export default function PaymentsManagement() {
 
   const filteredTemplates = useMemo(() => {
     return templates.filter((template) =>
-      template.templateName.toLowerCase().includes(searchQuery.toLowerCase())
+      template.templateName.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [templates, searchQuery]);
 
   const filteredPayments = useMemo(() => {
     return payments.filter(
       (payment) =>
-        payment.student?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        payment.student?.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        payment.templateItem?.label?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        payment.notes?.toLowerCase().includes(searchQuery.toLowerCase())
+        payment.student?.firstName
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        payment.student?.lastName
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        payment.templateItem?.label
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        payment.notes?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [payments, searchQuery]);
 
@@ -392,27 +424,27 @@ export default function PaymentsManagement() {
       pending: {
         color: "bg-yellow-100 dark:bg-yellow-500/10",
         text: "text-yellow-800 dark:text-yellow-400",
-        label: "Pending"
+        label: "Pending",
       },
       received: {
         color: "bg-green-100 dark:bg-green-500/10",
         text: "text-green-800 dark:text-green-400",
-        label: "Received"
+        label: "Received",
       },
       issued: {
         color: "bg-blue-100 dark:bg-blue-500/10",
         text: "text-blue-800 dark:text-blue-400",
-        label: "Issued"
+        label: "Issued",
       },
       failed: {
         color: "bg-red-100 dark:bg-red-500/10",
         text: "text-red-800 dark:text-red-400",
-        label: "Failed"
+        label: "Failed",
       },
       under_review: {
         color: "bg-purple-100 dark:bg-purple-500/10",
         text: "text-purple-800 dark:text-purple-400",
-        label: "Under Review"
+        label: "Under Review",
       },
     };
 
@@ -426,10 +458,13 @@ export default function PaymentsManagement() {
   };
 
   const PaymentTemplateCard = ({ template }: { template: PaymentTemplate }) => {
-    const totalAmount = template.items.reduce((sum, item) => sum + item.amount, 0);
+    const totalAmount = template.items.reduce(
+      (sum, item) => sum + item.amount,
+      0,
+    );
 
     return (
-      <Animated.View 
+      <Animated.View
         entering={ZoomIn.duration(300)}
         exiting={ZoomOut.duration(300)}
         className={`m-2 p-4 rounded-2xl ${currentTheme.card} border ${currentTheme.border}`}
@@ -444,16 +479,20 @@ export default function PaymentsManagement() {
               {template.studentCount} students
             </Text>
           </View>
-          <View className={`px-2 py-1 rounded ${
-            template.isActive
-              ? "bg-green-100 dark:bg-green-500/10"
-              : "bg-gray-100 dark:bg-gray-500/10"
-          }`}>
-            <Text className={`text-xs ${
+          <View
+            className={`px-2 py-1 rounded ${
               template.isActive
-                ? "text-green-600 dark:text-green-400"
-                : "text-gray-600 dark:text-gray-400"
-            }`}>
+                ? "bg-green-100 dark:bg-green-500/10"
+                : "bg-gray-100 dark:bg-gray-500/10"
+            }`}
+          >
+            <Text
+              className={`text-xs ${
+                template.isActive
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-gray-600 dark:text-gray-400"
+              }`}
+            >
               {template.isActive ? "Active" : "Inactive"}
             </Text>
           </View>
@@ -465,8 +504,14 @@ export default function PaymentsManagement() {
 
         <View className="space-y-2 mb-4">
           {template.items.slice(0, 2).map((item, index) => (
-            <View key={`${template.id || template.$id}-item-${index}`} className="flex-row justify-between items-center">
-              <Text className={`${currentTheme.textMuted} text-sm flex-1`} numberOfLines={1}>
+            <View
+              key={`${template.id || template.$id}-item-${index}`}
+              className="flex-row justify-between items-center"
+            >
+              <Text
+                className={`${currentTheme.textMuted} text-sm flex-1`}
+                numberOfLines={1}
+              >
                 {item.label}
               </Text>
               <Text className={`font-medium ${currentTheme.text} text-sm`}>
@@ -512,7 +557,9 @@ export default function PaymentsManagement() {
               <Edit size={16} color="#3b82f6" />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => deletePaymentTemplate(template.id || template.$id || '')}
+              onPress={() =>
+                deletePaymentTemplate(template.id || template.$id || "")
+              }
               className="p-2 bg-red-100 dark:bg-red-500/20 rounded-lg"
             >
               <Trash2 size={16} color="#ef4444" />
@@ -524,7 +571,8 @@ export default function PaymentsManagement() {
   };
 
   const PaymentHistoryCard = ({ payment }: { payment: Payment }) => {
-    const paymentName = payment.templateItem?.label || payment.notes || "Payment";
+    const paymentName =
+      payment.templateItem?.label || payment.notes || "Payment";
     const studentName = payment.student
       ? `${payment.student.firstName} ${payment.student.lastName}`
       : "Unknown Student";
@@ -536,18 +584,23 @@ export default function PaymentsManagement() {
     });
 
     return (
-      <View className={`${currentTheme.card} rounded-lg p-4 ${currentTheme.border} mb-3`}>
+      <View
+        className={`${currentTheme.card} rounded-lg p-4 ${currentTheme.border} mb-3`}
+      >
         <View className="flex-row justify-between items-start mb-2">
-          <Text className={`font-semibold ${currentTheme.text} flex-1`} numberOfLines={2}>
+          <Text
+            className={`font-semibold ${currentTheme.text} flex-1`}
+            numberOfLines={2}
+          >
             {paymentName}
           </Text>
           <PaymentStatusBadge status={payment.status} />
         </View>
-        
+
         <Text className={`text-sm ${currentTheme.text} mb-2`}>
           {studentName}
         </Text>
-        
+
         <View className="flex-row justify-between items-center">
           <View className="flex-row items-center gap-1">
             <Calendar size={14} color={currentTheme.textMuted} />
@@ -578,13 +631,17 @@ export default function PaymentsManagement() {
     value: string | number;
     color: string;
   }) => (
-    <View className={`${currentTheme.card} rounded-lg p-4 ${currentTheme.border}`}>
+    <View
+      className={`${currentTheme.card} rounded-lg p-4 ${currentTheme.border}`}
+    >
       <View className="flex-row items-center gap-3">
         <View className={`p-2 ${color} rounded-lg`}>
           <Icon size={20} color="white" />
         </View>
         <View>
-          <Text className={`text-2xl font-bold ${currentTheme.text}`}>{value}</Text>
+          <Text className={`text-2xl font-bold ${currentTheme.text}`}>
+            {value}
+          </Text>
           <Text className={`text-sm ${currentTheme.textMuted}`}>{title}</Text>
         </View>
       </View>
@@ -593,22 +650,24 @@ export default function PaymentsManagement() {
 
   const templateStats = useMemo(() => {
     const total = templates.length;
-    const active = templates.filter(t => t.isActive).length;
+    const active = templates.filter((t) => t.isActive).length;
     const totalStudents = templates.reduce((sum, t) => sum + t.studentCount, 0);
     return { total, active, totalStudents };
   }, [templates]);
 
   const paymentStats = useMemo(() => {
     const total = payments.length;
-    const received = payments.filter(p => p.status === "received").length;
-    const pending = payments.filter(p => p.status === "pending").length;
+    const received = payments.filter((p) => p.status === "received").length;
+    const pending = payments.filter((p) => p.status === "pending").length;
     const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
     return { total, received, pending, totalAmount };
   }, [payments]);
 
   if (loading.templates && templates.length === 0) {
     return (
-      <SafeAreaView className={`flex-1 ${currentTheme.background} items-center justify-center`}>
+      <SafeAreaView
+        className={`flex-1 ${currentTheme.background} items-center justify-center`}
+      >
         <ActivityIndicator size="large" color={currentTheme.primary} />
         <Text className={`mt-4 ${currentTheme.text}`}>Loading...</Text>
       </SafeAreaView>
@@ -619,21 +678,26 @@ export default function PaymentsManagement() {
     <SafeAreaView className={`flex-1 ${currentTheme.background}`}>
       {/* Toast Notification */}
       {toast && (
-        <Animated.View 
+        <Animated.View
           entering={SlideInDown.duration(300)}
           exiting={SlideOutDown.duration(200)}
           className="absolute top-4 left-4 right-4 z-50"
         >
           <LinearGradient
             colors={
-              toast.type === "success" ? ["#10b981", "#059669"] :
-              toast.type === "error" ? ["#ef4444", "#dc2626"] :
-              toast.type === "info" ? ["#3b82f6", "#2563eb"] :
-              ["#f59e0b", "#d97706"]
+              toast.type === "success"
+                ? ["#10b981", "#059669"]
+                : toast.type === "error"
+                  ? ["#ef4444", "#dc2626"]
+                  : toast.type === "info"
+                    ? ["#3b82f6", "#2563eb"]
+                    : ["#f59e0b", "#d97706"]
             }
             className="rounded-xl px-6 py-4 flex-row items-center justify-between shadow-2xl"
           >
-            <Text className="text-white font-medium flex-1">{toast.message}</Text>
+            <Text className="text-white font-medium flex-1">
+              {toast.message}
+            </Text>
             <TouchableOpacity onPress={() => setToast(null)}>
               <X size={20} color="white" />
             </TouchableOpacity>
@@ -651,15 +715,14 @@ export default function PaymentsManagement() {
             <View className="flex-row mt-2 gap-2">
               <View className="px-2 py-1 bg-purple-100 dark:bg-purple-500/10 rounded-full">
                 <Text className="text-purple-600 dark:text-purple-400 text-xs">
-                  {activeTab === "templates" 
+                  {activeTab === "templates"
                     ? `${templateStats.total} templates`
-                    : `${paymentStats.total} payments`
-                  }
+                    : `${paymentStats.total} payments`}
                 </Text>
               </View>
             </View>
           </View>
-          
+
           <View className="flex-row gap-2">
             <TouchableOpacity
               onPress={onRefresh}
@@ -667,7 +730,7 @@ export default function PaymentsManagement() {
             >
               <RefreshCw size={20} color={currentTheme.textMuted} />
             </TouchableOpacity>
-            
+
             {activeTab === "templates" && (
               <TouchableOpacity
                 onPress={() => setShowTemplateModal(true)}
@@ -689,8 +752,8 @@ export default function PaymentsManagement() {
           />
           <TextInput
             placeholder={
-              activeTab === "templates" 
-                ? "Search template names..." 
+              activeTab === "templates"
+                ? "Search template names..."
                 : "Search payments..."
             }
             placeholderTextColor={currentTheme.textMuted}
@@ -701,14 +764,16 @@ export default function PaymentsManagement() {
         </View>
 
         {/* Tabs */}
-        <View className={`flex-row ${currentTheme.card} rounded-lg p-1 ${currentTheme.border} mb-6`}>
+        <View
+          className={`flex-row ${currentTheme.card} rounded-lg p-1 ${currentTheme.border} mb-6`}
+        >
           {[
             { id: "templates", label: "Templates", icon: FileText },
             { id: "history", label: "History", icon: History },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            
+
             return (
               <TouchableOpacity
                 key={tab.id}
@@ -717,13 +782,18 @@ export default function PaymentsManagement() {
                   setSearchQuery("");
                 }}
                 className={`flex-1 flex-row items-center justify-center gap-2 py-2 rounded ${
-                  isActive
-                    ? "bg-purple-600"
-                    : ""
+                  isActive ? "bg-purple-600" : ""
                 }`}
               >
-                <Icon size={16} color={isActive ? "white" : currentTheme.textMuted} />
-                <Text className={isActive ? "text-white font-medium" : currentTheme.textMuted}>
+                <Icon
+                  size={16}
+                  color={isActive ? "white" : currentTheme.textMuted}
+                />
+                <Text
+                  className={
+                    isActive ? "text-white font-medium" : currentTheme.textMuted
+                  }
+                >
                   {tab.label}
                 </Text>
               </TouchableOpacity>
@@ -737,7 +807,11 @@ export default function PaymentsManagement() {
         <>
           {/* Template Stats */}
           <View className="px-4 mb-6">
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pb-2">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="pb-2"
+            >
               <View className="flex-row gap-3">
                 <StatsCard
                   icon={FileText}
@@ -766,7 +840,9 @@ export default function PaymentsManagement() {
             ref={flatListRef}
             data={filteredTemplates}
             numColumns={2}
-            keyExtractor={(item) => item.id || item.$id || Math.random().toString()}
+            keyExtractor={(item) =>
+              item.id || item.$id || Math.random().toString()
+            }
             renderItem={({ item }) => <PaymentTemplateCard template={item} />}
             refreshControl={
               <RefreshControl
@@ -779,12 +855,18 @@ export default function PaymentsManagement() {
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center py-20">
                 <FileText size={48} color={currentTheme.textMuted} />
-                <Text className={`text-lg font-medium mt-4 ${currentTheme.text}`}>
-                  {searchQuery ? "No matching templates found" : "No templates yet"}
+                <Text
+                  className={`text-lg font-medium mt-4 ${currentTheme.text}`}
+                >
+                  {searchQuery
+                    ? "No matching templates found"
+                    : "No templates yet"}
                 </Text>
-                <Text className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}>
-                  {searchQuery 
-                    ? "Try a different search term" 
+                <Text
+                  className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}
+                >
+                  {searchQuery
+                    ? "Try a different search term"
                     : "Create your first payment template to get started"}
                 </Text>
                 {!searchQuery && (
@@ -803,7 +885,11 @@ export default function PaymentsManagement() {
         <>
           {/* Payment Stats */}
           <View className="px-4 mb-6">
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pb-2">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="pb-2"
+            >
               <View className="flex-row gap-3">
                 <StatsCard
                   icon={Receipt}
@@ -841,7 +927,9 @@ export default function PaymentsManagement() {
           <FlatList
             ref={flatListRef}
             data={filteredPayments}
-            keyExtractor={(item) => item.id || item.$id || Math.random().toString()}
+            keyExtractor={(item) =>
+              item.id || item.$id || Math.random().toString()
+            }
             renderItem={({ item }) => <PaymentHistoryCard payment={item} />}
             refreshControl={
               <RefreshControl
@@ -854,12 +942,18 @@ export default function PaymentsManagement() {
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center py-20">
                 <History size={48} color={currentTheme.textMuted} />
-                <Text className={`text-lg font-medium mt-4 ${currentTheme.text}`}>
-                  {searchQuery ? "No matching payments found" : "No payments yet"}
+                <Text
+                  className={`text-lg font-medium mt-4 ${currentTheme.text}`}
+                >
+                  {searchQuery
+                    ? "No matching payments found"
+                    : "No payments yet"}
                 </Text>
-                <Text className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}>
-                  {searchQuery 
-                    ? "Try a different search term" 
+                <Text
+                  className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}
+                >
+                  {searchQuery
+                    ? "Try a different search term"
                     : "Payment history will appear here"}
                 </Text>
               </View>
@@ -875,7 +969,7 @@ export default function PaymentsManagement() {
         transparent={true}
       >
         <View className="flex-1 bg-black/50 justify-end">
-          <Animated.View 
+          <Animated.View
             entering={SlideInDown.duration(300)}
             exiting={SlideOutDown.duration(200)}
             className={`${currentTheme.card} rounded-t-3xl p-6 max-h-[85vh]`}
@@ -884,10 +978,16 @@ export default function PaymentsManagement() {
               <Text className={`text-xl font-bold ${currentTheme.text}`}>
                 Create Payment Template
               </Text>
-              <TouchableOpacity onPress={() => {
-                setShowTemplateModal(false);
-                setTemplateFormData({ templateName: "", items: [], isActive: true });
-              }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowTemplateModal(false);
+                  setTemplateFormData({
+                    templateName: "",
+                    items: [],
+                    isActive: true,
+                  });
+                }}
+              >
                 <X size={24} color={currentTheme.text} />
               </TouchableOpacity>
             </View>
@@ -902,10 +1002,12 @@ export default function PaymentsManagement() {
                     placeholder="e.g., Standard Tuition Fee, Course Materials, etc."
                     placeholderTextColor={currentTheme.textMuted}
                     value={templateFormData.templateName}
-                    onChangeText={(text) => setTemplateFormData({
-                      ...templateFormData,
-                      templateName: text
-                    })}
+                    onChangeText={(text) =>
+                      setTemplateFormData({
+                        ...templateFormData,
+                        templateName: text,
+                      })
+                    }
                     className={`px-4 py-3 rounded-xl border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                   />
                 </View>
@@ -950,7 +1052,9 @@ export default function PaymentsManagement() {
                           </Text>
                           <TouchableOpacity
                             onPress={() => {
-                              const newItems = templateFormData.items.filter((_, i) => i !== index);
+                              const newItems = templateFormData.items.filter(
+                                (_, i) => i !== index,
+                              );
                               setTemplateFormData({
                                 ...templateFormData,
                                 items: newItems,
@@ -963,7 +1067,9 @@ export default function PaymentsManagement() {
 
                         <View className="space-y-3">
                           <View>
-                            <Text className={`text-sm ${currentTheme.textMuted} mb-1`}>
+                            <Text
+                              className={`text-sm ${currentTheme.textMuted} mb-1`}
+                            >
                               Item Label *
                             </Text>
                             <TextInput
@@ -983,7 +1089,9 @@ export default function PaymentsManagement() {
                           </View>
 
                           <View>
-                            <Text className={`text-sm ${currentTheme.textMuted} mb-1`}>
+                            <Text
+                              className={`text-sm ${currentTheme.textMuted} mb-1`}
+                            >
                               Amount *
                             </Text>
                             <TextInput
@@ -1004,36 +1112,45 @@ export default function PaymentsManagement() {
                           </View>
 
                           <View>
-                            <Text className={`text-sm ${currentTheme.textMuted} mb-1`}>
+                            <Text
+                              className={`text-sm ${currentTheme.textMuted} mb-1`}
+                            >
                               Type
                             </Text>
                             <View className="flex-row gap-2 flex-wrap">
-                              {["tuition", "fee", "material", "other"].map((type) => (
-                                <TouchableOpacity
-                                  key={type}
-                                  onPress={() => {
-                                    const newItems = [...templateFormData.items];
-                                    newItems[index].type = type as any;
-                                    setTemplateFormData({
-                                      ...templateFormData,
-                                      items: newItems,
-                                    });
-                                  }}
-                                  className={`px-3 py-1.5 rounded ${
-                                    item.type === type
-                                      ? "bg-purple-600"
-                                      : "bg-gray-100 dark:bg-gray-700"
-                                  }`}
-                                >
-                                  <Text className={
-                                    item.type === type
-                                      ? "text-white"
-                                      : currentTheme.text
-                                  }>
-                                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                                  </Text>
-                                </TouchableOpacity>
-                              ))}
+                              {["tuition", "fee", "material", "other"].map(
+                                (type) => (
+                                  <TouchableOpacity
+                                    key={type}
+                                    onPress={() => {
+                                      const newItems = [
+                                        ...templateFormData.items,
+                                      ];
+                                      newItems[index].type = type as any;
+                                      setTemplateFormData({
+                                        ...templateFormData,
+                                        items: newItems,
+                                      });
+                                    }}
+                                    className={`px-3 py-1.5 rounded ${
+                                      item.type === type
+                                        ? "bg-purple-600"
+                                        : "bg-gray-100 dark:bg-gray-700"
+                                    }`}
+                                  >
+                                    <Text
+                                      className={
+                                        item.type === type
+                                          ? "text-white"
+                                          : currentTheme.text
+                                      }
+                                    >
+                                      {type.charAt(0).toUpperCase() +
+                                        type.slice(1)}
+                                    </Text>
+                                  </TouchableOpacity>
+                                ),
+                              )}
                             </View>
                           </View>
 
@@ -1049,14 +1166,20 @@ export default function PaymentsManagement() {
                               }}
                               className="flex-row items-center gap-2"
                             >
-                              <View className={`w-5 h-5 rounded border ${
-                                item.required 
-                                  ? "bg-purple-600 border-purple-600" 
-                                  : currentTheme.border
-                              } items-center justify-center`}>
-                                {item.required && <Check size={12} color="white" />}
+                              <View
+                                className={`w-5 h-5 rounded border ${
+                                  item.required
+                                    ? "bg-purple-600 border-purple-600"
+                                    : currentTheme.border
+                                } items-center justify-center`}
+                              >
+                                {item.required && (
+                                  <Check size={12} color="white" />
+                                )}
                               </View>
-                              <Text className={currentTheme.text}>Required</Text>
+                              <Text className={currentTheme.text}>
+                                Required
+                              </Text>
                             </TouchableOpacity>
                           </View>
                         </View>
@@ -1065,7 +1188,9 @@ export default function PaymentsManagement() {
                   </ScrollView>
 
                   {templateFormData.items.length === 0 && (
-                    <View className={`py-8 ${currentTheme.border} rounded-lg border-dashed items-center`}>
+                    <View
+                      className={`py-8 ${currentTheme.border} rounded-lg border-dashed items-center`}
+                    >
                       <FileText size={32} color={currentTheme.textMuted} />
                       <Text className={`${currentTheme.textMuted} mt-3`}>
                         No items added yet
@@ -1075,13 +1200,18 @@ export default function PaymentsManagement() {
                 </View>
 
                 {templateFormData.items.length > 0 && (
-                  <View className={`p-4 bg-gray-50 dark:bg-gray-800 rounded-lg`}>
+                  <View
+                    className={`p-4 bg-gray-50 dark:bg-gray-800 rounded-lg`}
+                  >
                     <View className="flex-row justify-between items-center">
                       <Text className={`font-medium ${currentTheme.text}`}>
                         Total Amount:
                       </Text>
-                      <Text className={`text-xl font-bold ${currentTheme.primary}`}>
-                        {templateFormData.items.reduce((sum, item) => sum + item.amount, 0)
+                      <Text
+                        className={`text-xl font-bold ${currentTheme.primary}`}
+                      >
+                        {templateFormData.items
+                          .reduce((sum, item) => sum + item.amount, 0)
                           .toLocaleString("en-NP", {
                             style: "currency",
                             currency: "NPR",
@@ -1094,21 +1224,23 @@ export default function PaymentsManagement() {
 
                 <View className="flex-row items-center gap-2">
                   <TouchableOpacity
-                    onPress={() => setTemplateFormData({
-                      ...templateFormData,
-                      isActive: !templateFormData.isActive
-                    })}
+                    onPress={() =>
+                      setTemplateFormData({
+                        ...templateFormData,
+                        isActive: !templateFormData.isActive,
+                      })
+                    }
                     className={`w-6 h-6 rounded border ${
-                      templateFormData.isActive 
-                        ? "bg-purple-600 border-purple-600" 
+                      templateFormData.isActive
+                        ? "bg-purple-600 border-purple-600"
                         : currentTheme.border
                     } items-center justify-center`}
                   >
-                    {templateFormData.isActive && <Check size={12} color="white" />}
+                    {templateFormData.isActive && (
+                      <Check size={12} color="white" />
+                    )}
                   </TouchableOpacity>
-                  <Text className={currentTheme.text}>
-                    Active Template
-                  </Text>
+                  <Text className={currentTheme.text}>Active Template</Text>
                 </View>
               </View>
             </ScrollView>
@@ -1117,7 +1249,11 @@ export default function PaymentsManagement() {
               <TouchableOpacity
                 onPress={() => {
                   setShowTemplateModal(false);
-                  setTemplateFormData({ templateName: "", items: [], isActive: true });
+                  setTemplateFormData({
+                    templateName: "",
+                    items: [],
+                    isActive: true,
+                  });
                 }}
                 className={`flex-1 py-3 rounded-xl border ${currentTheme.border} items-center`}
               >
@@ -1125,7 +1261,9 @@ export default function PaymentsManagement() {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={createPaymentTemplate}
-                disabled={isCreatingTemplate || templateFormData.items.length === 0}
+                disabled={
+                  isCreatingTemplate || templateFormData.items.length === 0
+                }
                 className="flex-1 bg-purple-600 py-3 rounded-xl items-center"
               >
                 {isCreatingTemplate ? (
@@ -1148,7 +1286,7 @@ export default function PaymentsManagement() {
         transparent={true}
       >
         <View className="flex-1 bg-black/50 justify-end">
-          <Animated.View 
+          <Animated.View
             entering={SlideInDown.duration(300)}
             exiting={SlideOutDown.duration(200)}
             className={`${currentTheme.card} rounded-t-3xl p-6 max-h-[85vh]`}
@@ -1157,11 +1295,17 @@ export default function PaymentsManagement() {
               <Text className={`text-xl font-bold ${currentTheme.text}`}>
                 Edit Payment Template
               </Text>
-              <TouchableOpacity onPress={() => {
-                setShowTemplateEditModal(false);
-                setSelectedTemplate(null);
-                setTemplateFormData({ templateName: "", items: [], isActive: true });
-              }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowTemplateEditModal(false);
+                  setSelectedTemplate(null);
+                  setTemplateFormData({
+                    templateName: "",
+                    items: [],
+                    isActive: true,
+                  });
+                }}
+              >
                 <X size={24} color={currentTheme.text} />
               </TouchableOpacity>
             </View>
@@ -1176,10 +1320,12 @@ export default function PaymentsManagement() {
                     placeholder="Template name"
                     placeholderTextColor={currentTheme.textMuted}
                     value={templateFormData.templateName}
-                    onChangeText={(text) => setTemplateFormData({
-                      ...templateFormData,
-                      templateName: text
-                    })}
+                    onChangeText={(text) =>
+                      setTemplateFormData({
+                        ...templateFormData,
+                        templateName: text,
+                      })
+                    }
                     className={`px-4 py-3 rounded-xl border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                   />
                 </View>
@@ -1224,7 +1370,9 @@ export default function PaymentsManagement() {
                           </Text>
                           <TouchableOpacity
                             onPress={() => {
-                              const newItems = templateFormData.items.filter((_, i) => i !== index);
+                              const newItems = templateFormData.items.filter(
+                                (_, i) => i !== index,
+                              );
                               setTemplateFormData({
                                 ...templateFormData,
                                 items: newItems,
@@ -1237,7 +1385,9 @@ export default function PaymentsManagement() {
 
                         <View className="space-y-3">
                           <View>
-                            <Text className={`text-sm ${currentTheme.textMuted} mb-1`}>
+                            <Text
+                              className={`text-sm ${currentTheme.textMuted} mb-1`}
+                            >
                               Item Label *
                             </Text>
                             <TextInput
@@ -1257,7 +1407,9 @@ export default function PaymentsManagement() {
                           </View>
 
                           <View>
-                            <Text className={`text-sm ${currentTheme.textMuted} mb-1`}>
+                            <Text
+                              className={`text-sm ${currentTheme.textMuted} mb-1`}
+                            >
                               Amount *
                             </Text>
                             <TextInput
@@ -1289,14 +1441,20 @@ export default function PaymentsManagement() {
                               }}
                               className="flex-row items-center gap-2"
                             >
-                              <View className={`w-5 h-5 rounded border ${
-                                item.required 
-                                  ? "bg-purple-600 border-purple-600" 
-                                  : currentTheme.border
-                              } items-center justify-center`}>
-                                {item.required && <Check size={12} color="white" />}
+                              <View
+                                className={`w-5 h-5 rounded border ${
+                                  item.required
+                                    ? "bg-purple-600 border-purple-600"
+                                    : currentTheme.border
+                                } items-center justify-center`}
+                              >
+                                {item.required && (
+                                  <Check size={12} color="white" />
+                                )}
                               </View>
-                              <Text className={currentTheme.text}>Required</Text>
+                              <Text className={currentTheme.text}>
+                                Required
+                              </Text>
                             </TouchableOpacity>
                           </View>
                         </View>
@@ -1307,21 +1465,23 @@ export default function PaymentsManagement() {
 
                 <View className="flex-row items-center gap-2">
                   <TouchableOpacity
-                    onPress={() => setTemplateFormData({
-                      ...templateFormData,
-                      isActive: !templateFormData.isActive
-                    })}
+                    onPress={() =>
+                      setTemplateFormData({
+                        ...templateFormData,
+                        isActive: !templateFormData.isActive,
+                      })
+                    }
                     className={`w-6 h-6 rounded border ${
-                      templateFormData.isActive 
-                        ? "bg-purple-600 border-purple-600" 
+                      templateFormData.isActive
+                        ? "bg-purple-600 border-purple-600"
                         : currentTheme.border
                     } items-center justify-center`}
                   >
-                    {templateFormData.isActive && <Check size={12} color="white" />}
+                    {templateFormData.isActive && (
+                      <Check size={12} color="white" />
+                    )}
                   </TouchableOpacity>
-                  <Text className={currentTheme.text}>
-                    Active Template
-                  </Text>
+                  <Text className={currentTheme.text}>Active Template</Text>
                 </View>
               </View>
             </ScrollView>
@@ -1331,7 +1491,11 @@ export default function PaymentsManagement() {
                 onPress={() => {
                   setShowTemplateEditModal(false);
                   setSelectedTemplate(null);
-                  setTemplateFormData({ templateName: "", items: [], isActive: true });
+                  setTemplateFormData({
+                    templateName: "",
+                    items: [],
+                    isActive: true,
+                  });
                 }}
                 className={`flex-1 py-3 rounded-xl border ${currentTheme.border} items-center`}
               >
@@ -1339,7 +1503,9 @@ export default function PaymentsManagement() {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={updatePaymentTemplate}
-                disabled={isUpdatingTemplate || templateFormData.items.length === 0}
+                disabled={
+                  isUpdatingTemplate || templateFormData.items.length === 0
+                }
                 className="flex-1 bg-purple-600 py-3 rounded-xl items-center"
               >
                 {isUpdatingTemplate ? (
@@ -1362,7 +1528,7 @@ export default function PaymentsManagement() {
         transparent={true}
       >
         <View className="flex-1 bg-black/50 justify-end">
-          <Animated.View 
+          <Animated.View
             entering={SlideInDown.duration(300)}
             exiting={SlideOutDown.duration(200)}
             className={`${currentTheme.card} rounded-t-3xl p-6 max-h-[85vh]`}
@@ -1371,10 +1537,12 @@ export default function PaymentsManagement() {
               <Text className={`text-xl font-bold ${currentTheme.text}`}>
                 Assign Template to Student
               </Text>
-              <TouchableOpacity onPress={() => {
-                setShowAssignStudentModal(false);
-                setSelectedTemplate(null);
-              }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowAssignStudentModal(false);
+                  setSelectedTemplate(null);
+                }}
+              >
                 <X size={24} color={currentTheme.text} />
               </TouchableOpacity>
             </View>
@@ -1399,9 +1567,12 @@ export default function PaymentsManagement() {
                       </Text>
                     </View>
                     <View className="flex-row justify-between">
-                      <Text className={currentTheme.textMuted}>Total Amount:</Text>
+                      <Text className={currentTheme.textMuted}>
+                        Total Amount:
+                      </Text>
                       <Text className="font-semibold text-green-600 dark:text-green-400">
-                        {selectedTemplate.items.reduce((sum, item) => sum + item.amount, 0)
+                        {selectedTemplate.items
+                          .reduce((sum, item) => sum + item.amount, 0)
                           .toLocaleString("en-NP", {
                             style: "currency",
                             currency: "NPR",
@@ -1417,7 +1588,7 @@ export default function PaymentsManagement() {
                 <Text className={`font-medium mb-4 ${currentTheme.text}`}>
                   Select Student
                 </Text>
-                
+
                 <View className="relative mb-4">
                   <Search
                     size={20}
@@ -1433,15 +1604,19 @@ export default function PaymentsManagement() {
 
                 <ScrollView className="max-h-60">
                   {students
-                    .filter(student => student.status === "in_progress" && !student.paymentTemplates)
+                    .filter(
+                      (student) =>
+                        student.status === "in_progress" &&
+                        !student.paymentTemplates,
+                    )
                     .map((student) => (
                       <TouchableOpacity
                         key={student.id || student.$id}
                         onPress={() => {
                           if (selectedTemplate) {
                             assignTemplateToStudent(
-                              student.id || student.$id || '',
-                              selectedTemplate.id || selectedTemplate.$id || ''
+                              student.id || student.$id || "",
+                              selectedTemplate.id || selectedTemplate.$id || "",
                             );
                           }
                         }}
@@ -1449,28 +1624,39 @@ export default function PaymentsManagement() {
                       >
                         <View className="flex-row items-center justify-between">
                           <View>
-                            <Text className={`font-medium ${currentTheme.text}`}>
+                            <Text
+                              className={`font-medium ${currentTheme.text}`}
+                            >
                               {student.firstName} {student.lastName}
                             </Text>
-                            <Text className={`text-sm ${currentTheme.textMuted}`}>
+                            <Text
+                              className={`text-sm ${currentTheme.textMuted}`}
+                            >
                               {student.email}
                             </Text>
                           </View>
-                          <ChevronRight size={20} color={currentTheme.textMuted} />
+                          <ChevronRight
+                            size={20}
+                            color={currentTheme.textMuted}
+                          />
                         </View>
                       </TouchableOpacity>
-                    ))
-                  }
+                    ))}
                 </ScrollView>
 
-                {students.filter(s => s.status === "in_progress" && !s.paymentTemplates).length === 0 && (
+                {students.filter(
+                  (s) => s.status === "in_progress" && !s.paymentTemplates,
+                ).length === 0 && (
                   <View className="py-8 items-center">
                     <UserPlus size={32} color={currentTheme.textMuted} />
                     <Text className={`${currentTheme.text} mt-3`}>
                       No unassigned students available
                     </Text>
-                    <Text className={`text-sm ${currentTheme.textMuted} mt-1 text-center`}>
-                      All in_progress students already have payment templates assigned.
+                    <Text
+                      className={`text-sm ${currentTheme.textMuted} mt-1 text-center`}
+                    >
+                      All in_progress students already have payment templates
+                      assigned.
                     </Text>
                   </View>
                 )}

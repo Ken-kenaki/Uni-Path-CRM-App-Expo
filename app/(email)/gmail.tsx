@@ -1,5 +1,5 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import {
     Archive,
     ChevronLeft,
@@ -13,9 +13,9 @@ import {
     Send,
     Star,
     Trash2,
-    XCircle
-} from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+    XCircle,
+} from "lucide-react-native";
+import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -25,8 +25,8 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
-} from 'react-native';
+    View,
+} from "react-native";
 
 interface Email {
   id: string;
@@ -44,16 +44,16 @@ export default function GmailScreen() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [emails, setEmails] = useState<Email[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [composeOpen, setComposeOpen] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
+  const [userEmail, setUserEmail] = useState("");
   const [labels, setLabels] = useState([
-    { id: 'INBOX', name: 'Inbox', count: 0, icon: Inbox },
-    { id: 'STARRED', name: 'Starred', count: 0, icon: Star },
-    { id: 'SENT', name: 'Sent', count: 0, icon: Send },
-    { id: 'DRAFT', name: 'Drafts', count: 0, icon: FileText }
+    { id: "INBOX", name: "Inbox", count: 0, icon: Inbox },
+    { id: "STARRED", name: "Starred", count: 0, icon: Star },
+    { id: "SENT", name: "Sent", count: 0, icon: Send },
+    { id: "DRAFT", name: "Drafts", count: 0, icon: FileText },
   ]);
-  const [selectedLabel, setSelectedLabel] = useState('INBOX');
+  const [selectedLabel, setSelectedLabel] = useState("INBOX");
   const router = useRouter();
 
   // Check authentication status
@@ -63,92 +63,96 @@ export default function GmailScreen() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/dashboard/gmail/auth/status`);
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/dashboard/gmail/auth/status`,
+      );
       const data = await response.json();
-      
+
       if (data.success && data.authenticated) {
         setIsAuthenticated(true);
-        setUserEmail(data.email || '');
+        setUserEmail(data.email || "");
         fetchEmails();
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error("Auth check failed:", error);
     }
   };
 
   const handleGmailLogin = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/dashboard/gmail/auth/login`);
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/dashboard/gmail/auth/login`,
+      );
       const data = await response.json();
-      
+
       if (data.success && data.authUrl) {
         Alert.alert(
-          'Gmail Login',
-          'You will be redirected to Google login. Please authorize the app to access your Gmail.',
+          "Gmail Login",
+          "You will be redirected to Google login. Please authorize the app to access your Gmail.",
           [
-            { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Continue', 
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Continue",
               onPress: async () => {
                 // Simulate login process
                 setIsAuthenticated(true);
-                setUserEmail('user@gmail.com');
+                setUserEmail("user@gmail.com");
                 fetchEmails();
                 setIsLoading(false);
-              }
-            }
-          ]
+              },
+            },
+          ],
         );
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to connect to Gmail');
+      Alert.alert("Error", error.message || "Failed to connect to Gmail");
       setIsLoading(false);
     }
   };
 
   const fetchEmails = async () => {
     if (!isAuthenticated) return;
-    
+
     setIsLoading(true);
     try {
       // Mock data for demo
       const mockEmails: Email[] = [
         {
-          id: '1',
-          subject: 'Welcome to Our Service',
-          from: 'support@company.com',
-          date: '2024-01-15T10:30:00Z',
-          snippet: 'Thank you for joining our service...',
+          id: "1",
+          subject: "Welcome to Our Service",
+          from: "support@company.com",
+          date: "2024-01-15T10:30:00Z",
+          snippet: "Thank you for joining our service...",
           read: true,
           starred: false,
-          hasAttachments: false
+          hasAttachments: false,
         },
         {
-          id: '2',
-          subject: 'Important Update',
-          from: 'notifications@system.com',
-          date: '2024-01-14T14:20:00Z',
-          snippet: 'Please review the latest updates...',
+          id: "2",
+          subject: "Important Update",
+          from: "notifications@system.com",
+          date: "2024-01-14T14:20:00Z",
+          snippet: "Please review the latest updates...",
           read: false,
           starred: true,
-          hasAttachments: true
+          hasAttachments: true,
         },
         {
-          id: '3',
-          subject: 'Weekly Report',
-          from: 'reports@analytics.com',
-          date: '2024-01-13T09:15:00Z',
-          snippet: 'Your weekly performance report...',
+          id: "3",
+          subject: "Weekly Report",
+          from: "reports@analytics.com",
+          date: "2024-01-13T09:15:00Z",
+          snippet: "Your weekly performance report...",
           read: true,
           starred: false,
-          hasAttachments: true
-        }
+          hasAttachments: true,
+        },
       ];
-      
+
       setEmails(mockEmails);
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch emails');
+      Alert.alert("Error", "Failed to fetch emails");
     } finally {
       setIsLoading(false);
     }
@@ -157,32 +161,37 @@ export default function GmailScreen() {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     const now = new Date();
-    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
+    const diffDays = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
     if (diffDays === 0) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } else if (diffDays === 1) {
-      return 'Yesterday';
+      return "Yesterday";
     } else if (diffDays < 7) {
-      return date.toLocaleDateString([], { weekday: 'short' });
+      return date.toLocaleDateString([], { weekday: "short" });
     } else {
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString([], { month: "short", day: "numeric" });
     }
   };
 
   const getSenderInitials = (from: string) => {
-    const name = from.split('@')[0];
+    const name = from.split("@")[0];
     return name.substring(0, 2).toUpperCase();
   };
 
   const getSenderName = (from: string) => {
-    return from.split('@')[0];
+    return from.split("@")[0];
   };
 
   return (
     <SafeAreaView className="flex-1 bg-black">
       <LinearGradient
-        colors={['#1e1b4b', '#0f172a', '#581c87']}
+        colors={["#1e1b4b", "#0f172a", "#581c87"]}
         className="flex-1"
       >
         {/* Header */}
@@ -198,11 +207,11 @@ export default function GmailScreen() {
               <View>
                 <Text className="text-2xl font-bold text-white">Gmail</Text>
                 <Text className="text-gray-400 text-sm">
-                  {isAuthenticated ? userEmail : 'Connect your account'}
+                  {isAuthenticated ? userEmail : "Connect your account"}
                 </Text>
               </View>
             </View>
-            
+
             {isAuthenticated ? (
               <TouchableOpacity
                 onPress={() => setComposeOpen(true)}
@@ -233,21 +242,27 @@ export default function GmailScreen() {
                 onChangeText={setSearchQuery}
                 className="bg-white/5 border border-gray-700 rounded-full px-4 py-3 text-white pl-12"
               />
-              <Search size={20} color="#9ca3af" className="absolute left-4 top-3.5" />
+              <Search
+                size={20}
+                color="#9ca3af"
+                className="absolute left-4 top-3.5"
+              />
             </View>
           </View>
 
           {/* Labels */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="mb-4"
+          >
             <View className="flex-row gap-2">
-              {labels.map(label => (
+              {labels.map((label) => (
                 <TouchableOpacity
                   key={label.id}
                   onPress={() => setSelectedLabel(label.id)}
                   className={`px-4 py-2 rounded-full flex-row items-center ${
-                    selectedLabel === label.id
-                      ? 'bg-purple-600'
-                      : 'bg-gray-800'
+                    selectedLabel === label.id ? "bg-purple-600" : "bg-gray-800"
                   }`}
                 >
                   <label.icon size={16} color="white" />
@@ -268,7 +283,9 @@ export default function GmailScreen() {
           {!isAuthenticated ? (
             <View className="items-center justify-center py-12">
               <Key size={64} color="#9ca3af" />
-              <Text className="text-white text-xl font-bold mt-6">Sign in to Gmail</Text>
+              <Text className="text-white text-xl font-bold mt-6">
+                Sign in to Gmail
+              </Text>
               <Text className="text-gray-400 text-center mt-2 mb-8">
                 Connect your Gmail account to view and manage your emails
               </Text>
@@ -282,7 +299,9 @@ export default function GmailScreen() {
                 ) : (
                   <>
                     <Key size={20} color="white" />
-                    <Text className="text-white ml-2 font-semibold text-lg">Sign in with Google</Text>
+                    <Text className="text-white ml-2 font-semibold text-lg">
+                      Sign in with Google
+                    </Text>
                   </>
                 )}
               </TouchableOpacity>
@@ -293,21 +312,34 @@ export default function GmailScreen() {
               {emails.length === 0 ? (
                 <View className="items-center justify-center py-12">
                   <Inbox size={64} color="#9ca3af" />
-                  <Text className="text-white text-xl font-bold mt-6">No emails</Text>
+                  <Text className="text-white text-xl font-bold mt-6">
+                    No emails
+                  </Text>
                   <Text className="text-gray-400 text-center mt-2">
-                    Your {labels.find(l => l.id === selectedLabel)?.name?.toLowerCase()} is empty
+                    Your{" "}
+                    {labels
+                      .find((l) => l.id === selectedLabel)
+                      ?.name?.toLowerCase()}{" "}
+                    is empty
                   </Text>
                 </View>
               ) : (
                 <View className="space-y-2">
                   {emails
-                    .filter(email => 
-                      searchQuery === '' ||
-                      email.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      email.from.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      email.snippet.toLowerCase().includes(searchQuery.toLowerCase())
+                    .filter(
+                      (email) =>
+                        searchQuery === "" ||
+                        email.subject
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase()) ||
+                        email.from
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase()) ||
+                        email.snippet
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase()),
                     )
-                    .map(email => (
+                    .map((email) => (
                       <TouchableOpacity
                         key={email.id}
                         onPress={() => setSelectedEmail(email)}
@@ -324,7 +356,9 @@ export default function GmailScreen() {
                           {/* Email Content */}
                           <View className="flex-1">
                             <View className="flex-row justify-between items-start mb-1">
-                              <Text className={`text-white font-semibold flex-1 ${email.read ? 'opacity-80' : ''}`}>
+                              <Text
+                                className={`text-white font-semibold flex-1 ${email.read ? "opacity-80" : ""}`}
+                              >
                                 {getSenderName(email.from)}
                               </Text>
                               <Text className="text-gray-400 text-sm">
@@ -332,18 +366,27 @@ export default function GmailScreen() {
                               </Text>
                             </View>
 
-                            <Text className={`text-white font-medium mb-1 ${email.read ? 'opacity-90' : ''}`}>
+                            <Text
+                              className={`text-white font-medium mb-1 ${email.read ? "opacity-90" : ""}`}
+                            >
                               {email.subject}
                             </Text>
 
-                            <Text className="text-gray-400 text-sm mb-2" numberOfLines={1}>
+                            <Text
+                              className="text-gray-400 text-sm mb-2"
+                              numberOfLines={1}
+                            >
                               {email.snippet}
                             </Text>
 
                             <View className="flex-row items-center justify-between">
                               <View className="flex-row items-center space-x-3">
                                 {email.starred && (
-                                  <Star size={16} color="#fbbf24" fill="#fbbf24" />
+                                  <Star
+                                    size={16}
+                                    color="#fbbf24"
+                                    fill="#fbbf24"
+                                  />
                                 )}
                                 {email.hasAttachments && (
                                   <Paperclip size={16} color="#9ca3af" />
@@ -372,7 +415,7 @@ export default function GmailScreen() {
         >
           <View className="flex-1 bg-black">
             <LinearGradient
-              colors={['#1e1b4b', '#0f172a', '#581c87']}
+              colors={["#1e1b4b", "#0f172a", "#581c87"]}
               className="flex-1"
             >
               {/* Header */}
@@ -402,7 +445,7 @@ export default function GmailScreen() {
                     <Text className="text-white text-2xl font-bold mb-4">
                       {selectedEmail.subject}
                     </Text>
-                    
+
                     <View className="flex-row items-start mb-6">
                       <View className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 items-center justify-center mr-3">
                         <Text className="text-white font-bold text-lg">
@@ -432,7 +475,9 @@ export default function GmailScreen() {
                       {selectedEmail.snippet}
                     </Text>
                     <Text className="text-white text-base leading-6 mt-4">
-                      This is a preview of the email content. In a real implementation, the full email body would be displayed here.
+                      This is a preview of the email content. In a real
+                      implementation, the full email body would be displayed
+                      here.
                     </Text>
                     <Text className="text-white text-base leading-6 mt-4">
                       Best regards,
@@ -445,10 +490,14 @@ export default function GmailScreen() {
                   {/* Attachments */}
                   {selectedEmail.hasAttachments && (
                     <View className="mb-6">
-                      <Text className="text-white font-semibold mb-3">Attachments</Text>
+                      <Text className="text-white font-semibold mb-3">
+                        Attachments
+                      </Text>
                       <TouchableOpacity className="bg-white/5 rounded-xl p-4 flex-row items-center">
                         <Paperclip size={20} color="#60a5fa" />
-                        <Text className="text-white ml-3 flex-1">document.pdf</Text>
+                        <Text className="text-white ml-3 flex-1">
+                          document.pdf
+                        </Text>
                         <Download size={20} color="#60a5fa" />
                       </TouchableOpacity>
                     </View>
@@ -463,7 +512,10 @@ export default function GmailScreen() {
                       <Text className="text-white">Forward</Text>
                     </TouchableOpacity>
                     <TouchableOpacity className="flex-1 bg-gray-800 rounded-xl p-3 items-center ml-2">
-                      <Star size={20} color={selectedEmail.starred ? "#fbbf24" : "white"} />
+                      <Star
+                        size={20}
+                        color={selectedEmail.starred ? "#fbbf24" : "white"}
+                      />
                     </TouchableOpacity>
                   </View>
                 </ScrollView>
@@ -473,17 +525,15 @@ export default function GmailScreen() {
         </Modal>
 
         {/* Compose Modal */}
-        <Modal
-          visible={composeOpen}
-          animationType="slide"
-          transparent={true}
-        >
+        <Modal visible={composeOpen} animationType="slide" transparent={true}>
           <View className="flex-1 bg-black/80">
             <View className="flex-1 bg-gray-900 mt-20 rounded-t-3xl">
               {/* Header */}
               <View className="p-6 border-b border-gray-800">
                 <View className="flex-row items-center justify-between mb-4">
-                  <Text className="text-white text-xl font-bold">New Message</Text>
+                  <Text className="text-white text-xl font-bold">
+                    New Message
+                  </Text>
                   <TouchableOpacity onPress={() => setComposeOpen(false)}>
                     <XCircle size={24} color="#9ca3af" />
                   </TouchableOpacity>

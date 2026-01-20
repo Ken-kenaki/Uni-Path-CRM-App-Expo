@@ -17,9 +17,15 @@ import {
     Search,
     Trash2,
     Users,
-    X
+    X,
 } from "lucide-react-native";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
     Dimensions,
     FlatList,
@@ -29,7 +35,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from "react-native";
 import Animated, {
     FadeIn,
@@ -72,7 +78,9 @@ export default function CountriesPage() {
   const [countries, setCountries] = useState<Country[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<"all" | "system" | "custom">("all");
+  const [filterType, setFilterType] = useState<"all" | "system" | "custom">(
+    "all",
+  );
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -83,65 +91,82 @@ export default function CountriesPage() {
   const [countryToDelete, setCountryToDelete] = useState<Country | null>(null);
   const [theme, setTheme] = useState<Theme>("dark");
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "warning" } | null>(null);
-  const [metadata, setMetadata] = useState({ page: 1, total: 0, hasMore: false, loadTime: 0, cache: "miss" });
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error" | "info" | "warning";
+  } | null>(null);
+  const [metadata, setMetadata] = useState({
+    page: 1,
+    total: 0,
+    hasMore: false,
+    loadTime: 0,
+    cache: "miss",
+  });
 
   const router = useRouter();
   const flatListRef = useRef<FlatList>(null);
   const currentTheme = themeConfigs[theme];
 
-  const showToast = useCallback((message: string, type: "success" | "error" | "info" | "warning") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
-    Haptics.notificationAsync(
-      type === "success" 
-        ? Haptics.NotificationFeedbackType.Success
-        : type === "error"
-        ? Haptics.NotificationFeedbackType.Error
-        : Haptics.NotificationFeedbackType.Warning
-    );
-  }, []);
+  const showToast = useCallback(
+    (message: string, type: "success" | "error" | "info" | "warning") => {
+      setToast({ message, type });
+      setTimeout(() => setToast(null), 4000);
+      Haptics.notificationAsync(
+        type === "success"
+          ? Haptics.NotificationFeedbackType.Success
+          : type === "error"
+            ? Haptics.NotificationFeedbackType.Error
+            : Haptics.NotificationFeedbackType.Warning,
+      );
+    },
+    [],
+  );
 
-  const fetchCountries = useCallback(async (page: number = 1, isRefresh = false) => {
-    try {
-      if (page === 1 && !isRefresh) setLoading(true);
-      if (page > 1) setLoadingMore(true);
+  const fetchCountries = useCallback(
+    async (page: number = 1, isRefresh = false) => {
+      try {
+        if (page === 1 && !isRefresh) setLoading(true);
+        if (page > 1) setLoadingMore(true);
 
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: "20",
-        type: filterType,
-        ...(searchQuery && { search: searchQuery })
-      });
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: "20",
+          type: filterType,
+          ...(searchQuery && { search: searchQuery }),
+        });
 
-      const response = await fetch(`${API_URL}/dashboard/countries?${params}`);
-      const result: ApiResponse = await response.json();
+        const response = await fetch(
+          `${API_URL}/dashboard/countries?${params}`,
+        );
+        const result: ApiResponse = await response.json();
 
-      if (result.success) {
-        if (page === 1) {
-          setCountries(result.data);
-        } else {
-          setCountries(prev => [...prev, ...result.data]);
+        if (result.success) {
+          if (page === 1) {
+            setCountries(result.data);
+          } else {
+            setCountries((prev) => [...prev, ...result.data]);
+          }
+
+          if (result.metadata) {
+            setMetadata({
+              page: result.metadata.page,
+              total: result.metadata.total,
+              hasMore: result.metadata.hasMore,
+              loadTime: result.metadata.totalTime,
+              cache: result.metadata.cache,
+            });
+          }
         }
-
-        if (result.metadata) {
-          setMetadata({
-            page: result.metadata.page,
-            total: result.metadata.total,
-            hasMore: result.metadata.hasMore,
-            loadTime: result.metadata.totalTime,
-            cache: result.metadata.cache
-          });
-        }
+      } catch (error) {
+        showToast("Error fetching countries", "error");
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+        setRefreshing(false);
       }
-    } catch (error) {
-      showToast("Error fetching countries", "error");
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-      setRefreshing(false);
-    }
-  }, [searchQuery, filterType, showToast]);
+    },
+    [searchQuery, filterType, showToast],
+  );
 
   useEffect(() => {
     fetchCountries(1);
@@ -170,9 +195,9 @@ export default function CountriesPage() {
     if (code.length === 2) {
       const offset = 127397;
       return code
-        .split('')
-        .map(char => String.fromCodePoint(char.charCodeAt(0) + offset))
-        .join('');
+        .split("")
+        .map((char) => String.fromCodePoint(char.charCodeAt(0) + offset))
+        .join("");
     }
     return "🌍";
   };
@@ -185,7 +210,7 @@ export default function CountriesPage() {
         body: JSON.stringify(formData),
       });
       const result = await response.json();
-      
+
       if (result.success) {
         showToast("Country created successfully", "success");
         setShowCreateModal(false);
@@ -202,13 +227,16 @@ export default function CountriesPage() {
   const updateCountry = async () => {
     if (!selectedCountry) return;
     try {
-      const response = await fetch(`${API_URL}/dashboard/countries/${selectedCountry.$id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${API_URL}/dashboard/countries/${selectedCountry.$id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        },
+      );
       const result = await response.json();
-      
+
       if (result.success) {
         showToast("Country updated successfully", "success");
         setShowEditModal(false);
@@ -226,9 +254,12 @@ export default function CountriesPage() {
   const deleteCountry = async () => {
     if (!countryToDelete) return;
     try {
-      const response = await fetch(`${API_URL}/dashboard/countries/${countryToDelete.$id}`, { 
-        method: "DELETE" 
-      });
+      const response = await fetch(
+        `${API_URL}/dashboard/countries/${countryToDelete.$id}`,
+        {
+          method: "DELETE",
+        },
+      );
       const result = await response.json();
       if (result.success) {
         showToast("Country deleted successfully", "success");
@@ -245,15 +276,18 @@ export default function CountriesPage() {
     }
   };
 
-  const handleDeleteClick = useCallback((country: Country) => {
-    if (country.isSystem) {
-      showToast("Cannot delete system countries", "warning");
-      return;
-    }
-    setCountryToDelete(country);
-    setShowDeleteModal(true);
-    setActionMenuOpen(null);
-  }, [showToast]);
+  const handleDeleteClick = useCallback(
+    (country: Country) => {
+      if (country.isSystem) {
+        showToast("Cannot delete system countries", "warning");
+        return;
+      }
+      setCountryToDelete(country);
+      setShowDeleteModal(true);
+      setActionMenuOpen(null);
+    },
+    [showToast],
+  );
 
   const openCreateModal = useCallback(() => {
     setFormData({ name: "", isoCode: "", description: "" });
@@ -262,20 +296,23 @@ export default function CountriesPage() {
     setActionMenuOpen(null);
   }, []);
 
-  const openEditModal = useCallback((country: Country) => {
-    if (country.isSystem) {
-      showToast("Cannot edit system countries", "warning");
-      return;
-    }
-    setSelectedCountry(country);
-    setFormData({
-      name: country.name,
-      isoCode: country.isoCode,
-      description: country.description || "",
-    });
-    setShowEditModal(true);
-    setActionMenuOpen(null);
-  }, [showToast]);
+  const openEditModal = useCallback(
+    (country: Country) => {
+      if (country.isSystem) {
+        showToast("Cannot edit system countries", "warning");
+        return;
+      }
+      setSelectedCountry(country);
+      setFormData({
+        name: country.name,
+        isoCode: country.isoCode,
+        description: country.description || "",
+      });
+      setShowEditModal(true);
+      setActionMenuOpen(null);
+    },
+    [showToast],
+  );
 
   const closeModals = useCallback(() => {
     setShowCreateModal(false);
@@ -287,18 +324,24 @@ export default function CountriesPage() {
   }, []);
 
   const handleActionMenuToggle = useCallback((countryId: string) => {
-    setActionMenuOpen(prev => prev === countryId ? null : countryId);
+    setActionMenuOpen((prev) => (prev === countryId ? null : countryId));
   }, []);
 
-  const handleViewStudents = useCallback((countryId: string) => {
-    router.push(`/countries/${countryId}/students`);
-    setActionMenuOpen(null);
-  }, [router]);
+  const handleViewStudents = useCallback(
+    (countryId: string) => {
+      router.push(`/countries/${countryId}/students`);
+      setActionMenuOpen(null);
+    },
+    [router],
+  );
 
-  const handleViewUniversities = useCallback((countryId: string) => {
-    router.push(`/countries/${countryId}/universities`);
-    setActionMenuOpen(null);
-  }, [router]);
+  const handleViewUniversities = useCallback(
+    (countryId: string) => {
+      router.push(`/countries/${countryId}/universities`);
+      setActionMenuOpen(null);
+    },
+    [router],
+  );
 
   const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -310,8 +353,8 @@ export default function CountriesPage() {
 
   const stats = useMemo(() => {
     const total = metadata.total;
-    const system = countries.filter(c => c.isSystem).length;
-    const custom = countries.filter(c => !c.isSystem).length;
+    const system = countries.filter((c) => c.isSystem).length;
+    const custom = countries.filter((c) => !c.isSystem).length;
     return { total, system, custom };
   }, [countries, metadata.total]);
 
@@ -321,7 +364,7 @@ export default function CountriesPage() {
     };
 
     return (
-      <Animated.View 
+      <Animated.View
         entering={ZoomIn.duration(300)}
         exiting={ZoomOut.duration(300)}
         className={`m-2 p-4 rounded-2xl ${currentTheme.card} border ${currentTheme.border}`}
@@ -335,7 +378,9 @@ export default function CountriesPage() {
           <View className="flex-row items-center">
             {country.isSystem && (
               <View className="px-2 py-1 bg-blue-100 rounded-full mr-2">
-                <Text className="text-xs text-blue-600 font-medium">System</Text>
+                <Text className="text-xs text-blue-600 font-medium">
+                  System
+                </Text>
               </View>
             )}
             <TouchableOpacity onPress={handleMorePress} className="p-1">
@@ -345,28 +390,42 @@ export default function CountriesPage() {
         </View>
 
         {/* Content */}
-        <Text className={`text-lg font-semibold ${currentTheme.text} mb-2`} numberOfLines={2}>
+        <Text
+          className={`text-lg font-semibold ${currentTheme.text} mb-2`}
+          numberOfLines={2}
+        >
           {country.name}
         </Text>
-        
+
         <View className="flex-row items-center mb-3">
           <Hash size={16} color={currentTheme.textMuted} />
-          <Text className={`text-sm ${currentTheme.textMuted} ml-2`}>{country.isoCode}</Text>
-          <View className={`px-2 py-1 rounded-full ml-2 ${country.isSystem ? "bg-blue-100" : "bg-green-100"}`}>
-            <Text className={`text-xs ${country.isSystem ? "text-blue-600" : "text-green-600"}`}>
+          <Text className={`text-sm ${currentTheme.textMuted} ml-2`}>
+            {country.isoCode}
+          </Text>
+          <View
+            className={`px-2 py-1 rounded-full ml-2 ${country.isSystem ? "bg-blue-100" : "bg-green-100"}`}
+          >
+            <Text
+              className={`text-xs ${country.isSystem ? "text-blue-600" : "text-green-600"}`}
+            >
               {country.isSystem ? "System" : "Custom"}
             </Text>
           </View>
         </View>
-        
+
         {country.description && (
-          <Text className={`text-sm ${currentTheme.textMuted} mb-4`} numberOfLines={2}>
+          <Text
+            className={`text-sm ${currentTheme.textMuted} mb-4`}
+            numberOfLines={2}
+          >
             {country.description}
           </Text>
         )}
 
         {/* Footer */}
-        <View className={`flex-row justify-between items-center pt-4 border-t ${currentTheme.border}`}>
+        <View
+          className={`flex-row justify-between items-center pt-4 border-t ${currentTheme.border}`}
+        >
           <Text className={`text-xs ${currentTheme.textMuted}`}>
             Created {formatDate(country.$createdAt)}
           </Text>
@@ -377,12 +436,12 @@ export default function CountriesPage() {
 
         {/* Action Menu */}
         {actionMenuOpen === country.$id && (
-          <Animated.View 
+          <Animated.View
             entering={FadeIn.duration(200)}
             exiting={FadeOut.duration(200)}
             className="absolute right-2 top-12 z-10 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700"
           >
-            <TouchableOpacity 
+            <TouchableOpacity
               className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-gray-700"
               onPress={() => {
                 handleViewStudents(country.$id);
@@ -391,20 +450,22 @@ export default function CountriesPage() {
               <Users size={16} color={currentTheme.text} />
               <Text className={`ml-2 ${currentTheme.text}`}>View Students</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-gray-700"
               onPress={() => {
                 handleViewUniversities(country.$id);
               }}
             >
               <School size={16} color={currentTheme.text} />
-              <Text className={`ml-2 ${currentTheme.text}`}>View Universities</Text>
+              <Text className={`ml-2 ${currentTheme.text}`}>
+                View Universities
+              </Text>
             </TouchableOpacity>
-            
+
             {!country.isSystem && (
               <>
-                <TouchableOpacity 
+                <TouchableOpacity
                   className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-gray-700"
                   onPress={() => {
                     openEditModal(country);
@@ -413,8 +474,8 @@ export default function CountriesPage() {
                   <Edit size={16} color={currentTheme.text} />
                   <Text className={`ml-2 ${currentTheme.text}`}>Edit</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   className="flex-row items-center px-4 py-3"
                   onPress={() => {
                     handleDeleteClick(country);
@@ -439,7 +500,10 @@ export default function CountriesPage() {
             <Text className="text-xl">{getFlagEmoji(country.isoCode)}</Text>
           </View>
           <View className="flex-1">
-            <Text className={`font-medium ${currentTheme.text}`} numberOfLines={1}>
+            <Text
+              className={`font-medium ${currentTheme.text}`}
+              numberOfLines={1}
+            >
               {country.name}
             </Text>
             <Text className={`text-xs ${currentTheme.textMuted}`}>
@@ -447,26 +511,39 @@ export default function CountriesPage() {
             </Text>
           </View>
         </View>
-        
+
         <View className="flex-row items-center">
-          <View className={`px-2 py-1 rounded-full mr-2 ${country.isSystem ? "bg-blue-100" : "bg-green-100"}`}>
-            <Text className={`text-xs ${country.isSystem ? "text-blue-600" : "text-green-600"}`}>
+          <View
+            className={`px-2 py-1 rounded-full mr-2 ${country.isSystem ? "bg-blue-100" : "bg-green-100"}`}
+          >
+            <Text
+              className={`text-xs ${country.isSystem ? "text-blue-600" : "text-green-600"}`}
+            >
               {country.isSystem ? "System" : "Custom"}
             </Text>
           </View>
-          
-          <TouchableOpacity onPress={() => openEditModal(country)} className="p-2 mr-2">
+
+          <TouchableOpacity
+            onPress={() => openEditModal(country)}
+            className="p-2 mr-2"
+          >
             <Edit size={16} color={currentTheme.textMuted} />
           </TouchableOpacity>
-          
-          <TouchableOpacity onPress={() => handleViewUniversities(country.$id)} className="p-2">
+
+          <TouchableOpacity
+            onPress={() => handleViewUniversities(country.$id)}
+            className="p-2"
+          >
             <School size={16} color={currentTheme.textMuted} />
           </TouchableOpacity>
         </View>
       </View>
-      
+
       {country.description && (
-        <Text className={`text-sm ${currentTheme.textMuted} mt-2`} numberOfLines={2}>
+        <Text
+          className={`text-sm ${currentTheme.textMuted} mt-2`}
+          numberOfLines={2}
+        >
           {country.description}
         </Text>
       )}
@@ -475,10 +552,18 @@ export default function CountriesPage() {
 
   if (loading && countries.length === 0) {
     return (
-      <SafeAreaView className={`flex-1 ${currentTheme.background} items-center justify-center`}>
+      <SafeAreaView
+        className={`flex-1 ${currentTheme.background} items-center justify-center`}
+      >
         <View className="items-center">
-          <RefreshCw size={32} color={currentTheme.primary} className="animate-spin" />
-          <Text className={`mt-4 ${currentTheme.text}`}>Loading countries...</Text>
+          <RefreshCw
+            size={32}
+            color={currentTheme.primary}
+            className="animate-spin"
+          />
+          <Text className={`mt-4 ${currentTheme.text}`}>
+            Loading countries...
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -488,21 +573,26 @@ export default function CountriesPage() {
     <SafeAreaView className={`flex-1 ${currentTheme.background}`}>
       {/* Toast Notification */}
       {toast && (
-        <Animated.View 
+        <Animated.View
           entering={SlideInDown.duration(300)}
           exiting={SlideOutDown.duration(200)}
           className="absolute top-4 left-4 right-4 z-50"
         >
           <LinearGradient
             colors={
-              toast.type === "success" ? ["#10b981", "#059669"] :
-              toast.type === "error" ? ["#ef4444", "#dc2626"] :
-              toast.type === "info" ? ["#3b82f6", "#2563eb"] :
-              ["#f59e0b", "#d97706"]
+              toast.type === "success"
+                ? ["#10b981", "#059669"]
+                : toast.type === "error"
+                  ? ["#ef4444", "#dc2626"]
+                  : toast.type === "info"
+                    ? ["#3b82f6", "#2563eb"]
+                    : ["#f59e0b", "#d97706"]
             }
             className="rounded-xl px-6 py-4 flex-row items-center justify-between shadow-2xl"
           >
-            <Text className="text-white font-medium flex-1">{toast.message}</Text>
+            <Text className="text-white font-medium flex-1">
+              {toast.message}
+            </Text>
             <TouchableOpacity onPress={() => setToast(null)}>
               <X size={20} color="white" />
             </TouchableOpacity>
@@ -514,7 +604,9 @@ export default function CountriesPage() {
       <View className="p-4">
         <View className="flex-row justify-between items-center mb-4">
           <View>
-            <Text className={`text-2xl font-bold ${currentTheme.text}`}>Countries</Text>
+            <Text className={`text-2xl font-bold ${currentTheme.text}`}>
+              Countries
+            </Text>
             <View className="flex-row mt-2 space-x-2">
               <View className="px-3 py-1 bg-purple-100 dark:bg-purple-500/10 rounded-full">
                 <Text className="text-purple-600 dark:text-purple-400 text-xs font-medium">
@@ -533,7 +625,7 @@ export default function CountriesPage() {
               </View>
             </View>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={openCreateModal}
             className="bg-gradient-to-r from-purple-600 to-purple-500 px-4 py-3 rounded-xl flex-row items-center"
           >
@@ -545,7 +637,11 @@ export default function CountriesPage() {
         {/* Search and Filters */}
         <View className="space-y-3">
           <View className="relative">
-            <Search size={20} color={currentTheme.textMuted} className="absolute left-3 top-3 z-10" />
+            <Search
+              size={20}
+              color={currentTheme.textMuted}
+              className="absolute left-3 top-3 z-10"
+            />
             <TextInput
               placeholder="Search countries..."
               placeholderTextColor={currentTheme.textMuted}
@@ -554,7 +650,7 @@ export default function CountriesPage() {
               className={`pl-10 pr-4 py-3 ${currentTheme.card} rounded-xl border ${currentTheme.border} ${currentTheme.text}`}
             />
             {searchQuery ? (
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setSearchQuery("")}
                 className="absolute right-3 top-3"
               >
@@ -564,13 +660,23 @@ export default function CountriesPage() {
           </View>
 
           <View className="flex-row space-x-2">
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-1">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="flex-1"
+            >
               <View className="flex-row space-x-2">
                 <TouchableOpacity
                   onPress={() => setFilterType("all")}
                   className={`px-4 py-2 rounded-full ${filterType === "all" ? "bg-purple-100 dark:bg-purple-600" : currentTheme.card}`}
                 >
-                  <Text className={filterType === "all" ? "text-purple-700 dark:text-white" : currentTheme.text}>
+                  <Text
+                    className={
+                      filterType === "all"
+                        ? "text-purple-700 dark:text-white"
+                        : currentTheme.text
+                    }
+                  >
                     All
                   </Text>
                 </TouchableOpacity>
@@ -578,7 +684,13 @@ export default function CountriesPage() {
                   onPress={() => setFilterType("system")}
                   className={`px-4 py-2 rounded-full ${filterType === "system" ? "bg-blue-100 dark:bg-blue-600" : currentTheme.card}`}
                 >
-                  <Text className={filterType === "system" ? "text-blue-700 dark:text-white" : currentTheme.text}>
+                  <Text
+                    className={
+                      filterType === "system"
+                        ? "text-blue-700 dark:text-white"
+                        : currentTheme.text
+                    }
+                  >
                     System
                   </Text>
                 </TouchableOpacity>
@@ -586,7 +698,13 @@ export default function CountriesPage() {
                   onPress={() => setFilterType("custom")}
                   className={`px-4 py-2 rounded-full ${filterType === "custom" ? "bg-green-100 dark:bg-green-600" : currentTheme.card}`}
                 >
-                  <Text className={filterType === "custom" ? "text-green-700 dark:text-white" : currentTheme.text}>
+                  <Text
+                    className={
+                      filterType === "custom"
+                        ? "text-green-700 dark:text-white"
+                        : currentTheme.text
+                    }
+                  >
                     Custom
                   </Text>
                 </TouchableOpacity>
@@ -594,7 +712,9 @@ export default function CountriesPage() {
             </ScrollView>
 
             <TouchableOpacity
-              onPress={() => setViewMode(viewMode === "grid" ? "table" : "grid")}
+              onPress={() =>
+                setViewMode(viewMode === "grid" ? "table" : "grid")
+              }
               className="p-2 rounded-xl bg-white dark:bg-gray-800"
             >
               {viewMode === "grid" ? (
@@ -614,8 +734,12 @@ export default function CountriesPage() {
         key={viewMode}
         keyExtractor={(item) => item.$id}
         numColumns={viewMode === "grid" ? 2 : 1}
-        renderItem={({ item }) => 
-          viewMode === "grid" ? <CountryCard country={item} /> : <TableRow country={item} />
+        renderItem={({ item }) =>
+          viewMode === "grid" ? (
+            <CountryCard country={item} />
+          ) : (
+            <TableRow country={item} />
+          )
         }
         refreshControl={
           <RefreshControl
@@ -643,11 +767,17 @@ export default function CountriesPage() {
         ListFooterComponent={
           loadingMore ? (
             <View className="py-4 items-center">
-              <RefreshCw size={24} color={currentTheme.primary} className="animate-spin" />
+              <RefreshCw
+                size={24}
+                color={currentTheme.primary}
+                className="animate-spin"
+              />
             </View>
           ) : metadata.hasMore ? (
             <View className="py-4 items-center">
-              <Text className={currentTheme.textMuted}>Scroll down to load more</Text>
+              <Text className={currentTheme.textMuted}>
+                Scroll down to load more
+              </Text>
             </View>
           ) : null
         }
@@ -660,7 +790,7 @@ export default function CountriesPage() {
         transparent={true}
       >
         <View className="flex-1 bg-black/50 justify-end">
-          <Animated.View 
+          <Animated.View
             entering={SlideInDown.duration(300)}
             exiting={SlideOutDown.duration(200)}
             className={`${currentTheme.card} rounded-t-3xl p-6 max-h-[90%]`}
@@ -677,23 +807,31 @@ export default function CountriesPage() {
             <ScrollView showsVerticalScrollIndicator={false}>
               <View className="space-y-4">
                 <View>
-                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>Country Name *</Text>
+                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>
+                    Country Name *
+                  </Text>
                   <TextInput
                     placeholder="Enter country name"
                     placeholderTextColor={currentTheme.textMuted}
                     value={formData.name}
-                    onChangeText={(text) => setFormData({...formData, name: text})}
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, name: text })
+                    }
                     className={`px-4 py-3 rounded-xl border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                   />
                 </View>
 
                 <View>
-                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>ISO Code *</Text>
+                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>
+                    ISO Code *
+                  </Text>
                   <TextInput
                     placeholder="e.g., USA, CAN, UK"
                     placeholderTextColor={currentTheme.textMuted}
                     value={formData.isoCode}
-                    onChangeText={(text) => setFormData({...formData, isoCode: text.toUpperCase()})}
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, isoCode: text.toUpperCase() })
+                    }
                     maxLength={3}
                     autoCapitalize="characters"
                     className={`px-4 py-3 rounded-xl border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
@@ -701,12 +839,16 @@ export default function CountriesPage() {
                 </View>
 
                 <View>
-                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>Description</Text>
+                  <Text className={`font-medium mb-2 ${currentTheme.text}`}>
+                    Description
+                  </Text>
                   <TextInput
                     placeholder="Enter country description (optional)"
                     placeholderTextColor={currentTheme.textMuted}
                     value={formData.description}
-                    onChangeText={(text) => setFormData({...formData, description: text})}
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, description: text })
+                    }
                     multiline
                     numberOfLines={4}
                     className={`px-4 py-3 rounded-xl border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
@@ -736,13 +878,9 @@ export default function CountriesPage() {
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal
-        visible={showDeleteModal}
-        transparent={true}
-        animationType="fade"
-      >
+      <Modal visible={showDeleteModal} transparent={true} animationType="fade">
         <View className="flex-1 bg-black/50 items-center justify-center p-6">
-          <Animated.View 
+          <Animated.View
             entering={ZoomIn.duration(300)}
             exiting={ZoomOut.duration(200)}
             className={`${currentTheme.card} rounded-2xl p-6 w-full max-w-md`}

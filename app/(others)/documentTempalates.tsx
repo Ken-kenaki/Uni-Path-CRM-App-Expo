@@ -13,9 +13,15 @@ import {
     RefreshCw,
     Search,
     Trash2,
-    X
+    X,
 } from "lucide-react-native";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -33,7 +39,7 @@ import Animated, {
     SlideInDown,
     SlideOutDown,
     ZoomIn,
-    ZoomOut
+    ZoomOut,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -76,7 +82,8 @@ export default function DocumentsPage() {
   });
   const [refreshing, setRefreshing] = useState(false);
   const [showTemplatesModal, setShowTemplatesModal] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<DocumentTemplate | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [theme, setTheme] = useState<Theme>("dark");
   const [toast, setToast] = useState<{
@@ -93,21 +100,24 @@ export default function DocumentsPage() {
   const currentTheme = themeConfigs[theme];
   const flatListRef = useRef<FlatList>(null);
 
-  const showToast = useCallback((message: string, type: "success" | "error" | "info" | "warning") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
-    Haptics.notificationAsync(
-      type === "success"
-        ? Haptics.NotificationFeedbackType.Success
-        : type === "error"
-        ? Haptics.NotificationFeedbackType.Error
-        : Haptics.NotificationFeedbackType.Warning
-    );
-  }, []);
+  const showToast = useCallback(
+    (message: string, type: "success" | "error" | "info" | "warning") => {
+      setToast({ message, type });
+      setTimeout(() => setToast(null), 4000);
+      Haptics.notificationAsync(
+        type === "success"
+          ? Haptics.NotificationFeedbackType.Success
+          : type === "error"
+            ? Haptics.NotificationFeedbackType.Error
+            : Haptics.NotificationFeedbackType.Warning,
+      );
+    },
+    [],
+  );
 
   const fetchTemplates = useCallback(async () => {
     try {
-      setLoading(prev => ({ ...prev, templates: true }));
+      setLoading((prev) => ({ ...prev, templates: true }));
       const response = await fetch(`${API_URL}/dashboard/documentTemplates`);
       const result = await response.json();
 
@@ -119,7 +129,7 @@ export default function DocumentsPage() {
     } catch (error) {
       showToast("Error fetching templates", "error");
     } finally {
-      setLoading(prev => ({ ...prev, templates: false }));
+      setLoading((prev) => ({ ...prev, templates: false }));
       setRefreshing(false);
     }
   }, [showToast]);
@@ -136,7 +146,7 @@ export default function DocumentsPage() {
 
   const createTemplate = async () => {
     try {
-      setLoading(prev => ({ ...prev, templates: true }));
+      setLoading((prev) => ({ ...prev, templates: true }));
       const response = await fetch(`${API_URL}/dashboard/documentTemplates`, {
         method: "POST",
         headers: {
@@ -161,21 +171,24 @@ export default function DocumentsPage() {
     } catch (error) {
       showToast("Error creating template", "error");
     } finally {
-      setLoading(prev => ({ ...prev, templates: false }));
+      setLoading((prev) => ({ ...prev, templates: false }));
     }
   };
 
   const updateTemplate = async () => {
     if (!selectedTemplate) return;
     try {
-      setLoading(prev => ({ ...prev, templates: true }));
-      const response = await fetch(`${API_URL}/dashboard/documentTemplates/${selectedTemplate.$id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      setLoading((prev) => ({ ...prev, templates: true }));
+      const response = await fetch(
+        `${API_URL}/dashboard/documentTemplates/${selectedTemplate.$id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(templateFormData),
         },
-        body: JSON.stringify(templateFormData),
-      });
+      );
 
       const result = await response.json();
       if (result.success) {
@@ -194,7 +207,7 @@ export default function DocumentsPage() {
     } catch (error) {
       showToast("Error updating template", "error");
     } finally {
-      setLoading(prev => ({ ...prev, templates: false }));
+      setLoading((prev) => ({ ...prev, templates: false }));
     }
   };
 
@@ -209,10 +222,13 @@ export default function DocumentsPage() {
           style: "destructive",
           onPress: async () => {
             try {
-              setLoading(prev => ({ ...prev, templates: true }));
-              const response = await fetch(`${API_URL}/dashboard/documentTemplates/${id}`, {
-                method: "DELETE",
-              });
+              setLoading((prev) => ({ ...prev, templates: true }));
+              const response = await fetch(
+                `${API_URL}/dashboard/documentTemplates/${id}`,
+                {
+                  method: "DELETE",
+                },
+              );
 
               const result = await response.json();
               if (result.success) {
@@ -224,11 +240,11 @@ export default function DocumentsPage() {
             } catch (error) {
               showToast("Error deleting template", "error");
             } finally {
-              setLoading(prev => ({ ...prev, templates: false }));
+              setLoading((prev) => ({ ...prev, templates: false }));
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -246,19 +262,19 @@ export default function DocumentsPage() {
     return templates.filter((template) => {
       const templateName = template.templateName?.toLowerCase() || "";
       const templateItems = template.templateItems || [];
-      
+
       const matchesSearch = templateName.includes(searchQuery.toLowerCase());
-      
-      const matchesItems = templateItems.some((item: any) => 
-        item.itemName?.toLowerCase().includes(searchQuery.toLowerCase())
+
+      const matchesItems = templateItems.some((item: any) =>
+        item.itemName?.toLowerCase().includes(searchQuery.toLowerCase()),
       );
-      
+
       return matchesSearch || matchesItems;
     });
   }, [templates, searchQuery]);
 
   const TemplateCard = ({ template }: { template: DocumentTemplate }) => (
-    <Animated.View 
+    <Animated.View
       entering={ZoomIn.duration(300)}
       exiting={ZoomOut.duration(300)}
       className={`m-2 p-4 rounded-2xl ${currentTheme.card} border ${currentTheme.border}`}
@@ -274,20 +290,25 @@ export default function DocumentsPage() {
               {template.templateName}
             </Text>
             <Text className={`text-sm ${currentTheme.textMuted}`}>
-              {template.studentCount || 0} student{template.studentCount !== 1 ? 's' : ''}
+              {template.studentCount || 0} student
+              {template.studentCount !== 1 ? "s" : ""}
             </Text>
           </View>
         </View>
-        <View className={`px-2 py-1 rounded ${
-          template.isActive
-            ? "bg-green-100 dark:bg-green-500/10"
-            : "bg-gray-100 dark:bg-gray-500/10"
-        }`}>
-          <Text className={`text-xs ${
+        <View
+          className={`px-2 py-1 rounded ${
             template.isActive
-              ? "text-green-600 dark:text-green-400"
-              : "text-gray-600 dark:text-gray-400"
-          }`}>
+              ? "bg-green-100 dark:bg-green-500/10"
+              : "bg-gray-100 dark:bg-gray-500/10"
+          }`}
+        >
+          <Text
+            className={`text-xs ${
+              template.isActive
+                ? "text-green-600 dark:text-green-400"
+                : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
             {template.isActive ? "Active" : "Inactive"}
           </Text>
         </View>
@@ -297,7 +318,10 @@ export default function DocumentsPage() {
         {template.templateItems?.slice(0, 3).map((doc: any) => (
           <View key={doc.$id || doc.id} className="flex-row items-center gap-2">
             <FileText size={16} color="#10b981" />
-            <Text className={`flex-1 text-sm ${currentTheme.text}`} numberOfLines={1}>
+            <Text
+              className={`flex-1 text-sm ${currentTheme.text}`}
+              numberOfLines={1}
+            >
               {doc.itemName}
             </Text>
             {doc.required && (
@@ -309,7 +333,8 @@ export default function DocumentsPage() {
         ))}
         {template.templateItems?.length > 3 && (
           <Text className={`text-sm ${currentTheme.textMuted} pt-1`}>
-            +{template.templateItems.length - 3} more item{template.templateItems.length - 3 !== 1 ? 's' : ''}
+            +{template.templateItems.length - 3} more item
+            {template.templateItems.length - 3 !== 1 ? "s" : ""}
           </Text>
         )}
         {(!template.templateItems || template.templateItems.length === 0) && (
@@ -319,9 +344,12 @@ export default function DocumentsPage() {
         )}
       </View>
 
-      <View className={`flex-row justify-between items-center pt-3 border-t ${currentTheme.border}`}>
+      <View
+        className={`flex-row justify-between items-center pt-3 border-t ${currentTheme.border}`}
+      >
         <Text className={`text-xs ${currentTheme.textMuted}`}>
-          {template.templateItems?.length || 0} item{template.templateItems?.length !== 1 ? 's' : ''}
+          {template.templateItems?.length || 0} item
+          {template.templateItems?.length !== 1 ? "s" : ""}
         </Text>
         <View className="flex-row gap-1">
           <TouchableOpacity
@@ -343,9 +371,13 @@ export default function DocumentsPage() {
 
   if (loading.templates && templates.length === 0) {
     return (
-      <SafeAreaView className={`flex-1 ${currentTheme.background} items-center justify-center`}>
+      <SafeAreaView
+        className={`flex-1 ${currentTheme.background} items-center justify-center`}
+      >
         <ActivityIndicator size="large" color={currentTheme.primary} />
-        <Text className={`mt-4 ${currentTheme.text}`}>Loading templates...</Text>
+        <Text className={`mt-4 ${currentTheme.text}`}>
+          Loading templates...
+        </Text>
       </SafeAreaView>
     );
   }
@@ -354,21 +386,26 @@ export default function DocumentsPage() {
     <SafeAreaView className={`flex-1 ${currentTheme.background}`}>
       {/* Toast Notification */}
       {toast && (
-        <Animated.View 
+        <Animated.View
           entering={SlideInDown.duration(300)}
           exiting={SlideOutDown.duration(200)}
           className="absolute top-4 left-4 right-4 z-50"
         >
           <LinearGradient
             colors={
-              toast.type === "success" ? ["#10b981", "#059669"] :
-              toast.type === "error" ? ["#ef4444", "#dc2626"] :
-              toast.type === "info" ? ["#3b82f6", "#2563eb"] :
-              ["#f59e0b", "#d97706"]
+              toast.type === "success"
+                ? ["#10b981", "#059669"]
+                : toast.type === "error"
+                  ? ["#ef4444", "#dc2626"]
+                  : toast.type === "info"
+                    ? ["#3b82f6", "#2563eb"]
+                    : ["#f59e0b", "#d97706"]
             }
             className="rounded-xl px-6 py-4 flex-row items-center justify-between shadow-2xl"
           >
-            <Text className="text-white font-medium flex-1">{toast.message}</Text>
+            <Text className="text-white font-medium flex-1">
+              {toast.message}
+            </Text>
             <TouchableOpacity onPress={() => setToast(null)}>
               <X size={20} color="white" />
             </TouchableOpacity>
@@ -384,10 +421,10 @@ export default function DocumentsPage() {
               Document Templates
             </Text>
             <Text className={`text-sm ${currentTheme.textMuted} mt-1`}>
-              {templates.length} template{templates.length !== 1 ? 's' : ''}
+              {templates.length} template{templates.length !== 1 ? "s" : ""}
             </Text>
           </View>
-          
+
           <View className="flex-row gap-2">
             <TouchableOpacity
               onPress={onRefresh}
@@ -395,7 +432,7 @@ export default function DocumentsPage() {
             >
               <RefreshCw size={20} color={currentTheme.textMuted} />
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               onPress={() => setShowTemplatesModal(true)}
               className="flex-row items-center gap-2 px-4 py-2.5 bg-purple-600 rounded-lg"
@@ -444,9 +481,11 @@ export default function DocumentsPage() {
             <Text className={`text-lg font-medium mt-4 ${currentTheme.text}`}>
               {searchQuery ? "No matching templates found" : "No templates yet"}
             </Text>
-            <Text className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}>
-              {searchQuery 
-                ? "Try a different search term" 
+            <Text
+              className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}
+            >
+              {searchQuery
+                ? "Try a different search term"
                 : "Create your first document template to get started"}
             </Text>
             {!searchQuery && (
@@ -468,7 +507,7 @@ export default function DocumentsPage() {
         transparent={true}
       >
         <View className="flex-1 bg-black/50 justify-end">
-          <Animated.View 
+          <Animated.View
             entering={SlideInDown.duration(300)}
             exiting={SlideOutDown.duration(200)}
             className={`${currentTheme.card} rounded-t-3xl p-6 max-h-[85vh]`}
@@ -477,15 +516,17 @@ export default function DocumentsPage() {
               <Text className={`text-xl font-bold ${currentTheme.text}`}>
                 {selectedTemplate ? "Edit Template" : "Create Template"}
               </Text>
-              <TouchableOpacity onPress={() => {
-                setShowTemplatesModal(false);
-                setSelectedTemplate(null);
-                setTemplateFormData({
-                  templateName: "",
-                  templateItems: [],
-                  isActive: true,
-                });
-              }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowTemplatesModal(false);
+                  setSelectedTemplate(null);
+                  setTemplateFormData({
+                    templateName: "",
+                    templateItems: [],
+                    isActive: true,
+                  });
+                }}
+              >
                 <X size={24} color={currentTheme.text} />
               </TouchableOpacity>
             </View>
@@ -500,10 +541,12 @@ export default function DocumentsPage() {
                     placeholder="Enter template name"
                     placeholderTextColor={currentTheme.textMuted}
                     value={templateFormData.templateName}
-                    onChangeText={(text) => setTemplateFormData({
-                      ...templateFormData,
-                      templateName: text
-                    })}
+                    onChangeText={(text) =>
+                      setTemplateFormData({
+                        ...templateFormData,
+                        templateName: text,
+                      })
+                    }
                     className={`px-4 py-3 rounded-xl border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                   />
                 </View>
@@ -547,7 +590,9 @@ export default function DocumentsPage() {
                           </Text>
                           <TouchableOpacity
                             onPress={() => {
-                              const newItems = [...templateFormData.templateItems];
+                              const newItems = [
+                                ...templateFormData.templateItems,
+                              ];
                               newItems.splice(index, 1);
                               setTemplateFormData({
                                 ...templateFormData,
@@ -561,7 +606,9 @@ export default function DocumentsPage() {
 
                         <View className="space-y-3">
                           <View>
-                            <Text className={`text-sm ${currentTheme.textMuted} mb-1`}>
+                            <Text
+                              className={`text-sm ${currentTheme.textMuted} mb-1`}
+                            >
                               Item Name *
                             </Text>
                             <TextInput
@@ -569,7 +616,9 @@ export default function DocumentsPage() {
                               placeholderTextColor={currentTheme.textMuted}
                               value={item.itemName}
                               onChangeText={(text) => {
-                                const newItems = [...templateFormData.templateItems];
+                                const newItems = [
+                                  ...templateFormData.templateItems,
+                                ];
                                 newItems[index].itemName = text;
                                 setTemplateFormData({
                                   ...templateFormData,
@@ -583,7 +632,9 @@ export default function DocumentsPage() {
                           <View className="flex-row items-center gap-2">
                             <TouchableOpacity
                               onPress={() => {
-                                const newItems = [...templateFormData.templateItems];
+                                const newItems = [
+                                  ...templateFormData.templateItems,
+                                ];
                                 newItems[index].required = !item.required;
                                 setTemplateFormData({
                                   ...templateFormData,
@@ -592,19 +643,27 @@ export default function DocumentsPage() {
                               }}
                               className="flex-row items-center gap-2"
                             >
-                              <View className={`w-5 h-5 rounded border ${
-                                item.required 
-                                  ? "bg-purple-600 border-purple-600" 
-                                  : currentTheme.border
-                              } items-center justify-center`}>
-                                {item.required && <Check size={12} color="white" />}
+                              <View
+                                className={`w-5 h-5 rounded border ${
+                                  item.required
+                                    ? "bg-purple-600 border-purple-600"
+                                    : currentTheme.border
+                                } items-center justify-center`}
+                              >
+                                {item.required && (
+                                  <Check size={12} color="white" />
+                                )}
                               </View>
-                              <Text className={currentTheme.text}>Required</Text>
+                              <Text className={currentTheme.text}>
+                                Required
+                              </Text>
                             </TouchableOpacity>
                           </View>
 
                           <View>
-                            <Text className={`text-sm ${currentTheme.textMuted} mb-1`}>
+                            <Text
+                              className={`text-sm ${currentTheme.textMuted} mb-1`}
+                            >
                               Description (optional)
                             </Text>
                             <TextInput
@@ -612,7 +671,9 @@ export default function DocumentsPage() {
                               placeholderTextColor={currentTheme.textMuted}
                               value={item.description}
                               onChangeText={(text) => {
-                                const newItems = [...templateFormData.templateItems];
+                                const newItems = [
+                                  ...templateFormData.templateItems,
+                                ];
                                 newItems[index].description = text;
                                 setTemplateFormData({
                                   ...templateFormData,
@@ -628,7 +689,9 @@ export default function DocumentsPage() {
                   </ScrollView>
 
                   {templateFormData.templateItems.length === 0 && (
-                    <View className={`py-8 ${currentTheme.border} rounded-lg border-dashed items-center`}>
+                    <View
+                      className={`py-8 ${currentTheme.border} rounded-lg border-dashed items-center`}
+                    >
                       <FileText size={32} color={currentTheme.textMuted} />
                       <Text className={`${currentTheme.textMuted} mt-3`}>
                         No items added yet
@@ -639,21 +702,23 @@ export default function DocumentsPage() {
 
                 <View className="flex-row items-center gap-2">
                   <TouchableOpacity
-                    onPress={() => setTemplateFormData({
-                      ...templateFormData,
-                      isActive: !templateFormData.isActive
-                    })}
+                    onPress={() =>
+                      setTemplateFormData({
+                        ...templateFormData,
+                        isActive: !templateFormData.isActive,
+                      })
+                    }
                     className={`w-6 h-6 rounded border ${
-                      templateFormData.isActive 
-                        ? "bg-purple-600 border-purple-600" 
+                      templateFormData.isActive
+                        ? "bg-purple-600 border-purple-600"
                         : currentTheme.border
                     } items-center justify-center`}
                   >
-                    {templateFormData.isActive && <Check size={12} color="white" />}
+                    {templateFormData.isActive && (
+                      <Check size={12} color="white" />
+                    )}
                   </TouchableOpacity>
-                  <Text className={currentTheme.text}>
-                    Active Template
-                  </Text>
+                  <Text className={currentTheme.text}>Active Template</Text>
                 </View>
               </View>
             </ScrollView>
@@ -675,7 +740,10 @@ export default function DocumentsPage() {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={selectedTemplate ? updateTemplate : createTemplate}
-                disabled={loading.templates || templateFormData.templateItems.length === 0}
+                disabled={
+                  loading.templates ||
+                  templateFormData.templateItems.length === 0
+                }
                 className="flex-1 bg-purple-600 py-3 rounded-xl items-center"
               >
                 {loading.templates ? (

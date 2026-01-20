@@ -30,7 +30,7 @@ import {
     UserCheck,
     UserPlus,
     Users,
-    X
+    X,
 } from "lucide-react-native";
 import React, {
     useCallback,
@@ -60,7 +60,7 @@ import Animated, {
     FadeIn,
     FadeOut,
     SlideInDown,
-    SlideOutDown
+    SlideOutDown,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -281,15 +281,15 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 // Student Card Component
-const StudentCard = ({ 
-  student, 
-  isSelected, 
+const StudentCard = ({
+  student,
+  isSelected,
   onSelect,
   onPress,
-  onMorePress 
-}: { 
-  student: Student; 
-  isSelected: boolean; 
+  onMorePress,
+}: {
+  student: Student;
+  isSelected: boolean;
   onSelect: () => void;
   onPress: () => void;
   onMorePress: () => void;
@@ -298,7 +298,7 @@ const StudentCard = ({
   const currentTheme = themeConfigs[theme];
 
   const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
+    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
   };
 
   return (
@@ -316,11 +316,13 @@ const StudentCard = ({
             }}
             className="mt-1"
           >
-            <View className={`w-5 h-5 rounded border ${isSelected ? 'bg-purple-600 border-purple-600' : currentTheme.border} items-center justify-center`}>
+            <View
+              className={`w-5 h-5 rounded border ${isSelected ? "bg-purple-600 border-purple-600" : currentTheme.border} items-center justify-center`}
+            >
               {isSelected && <Check size={12} color="white" />}
             </View>
           </TouchableOpacity>
-          
+
           <View className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 items-center justify-center">
             <Text className="text-white font-bold">
               {getInitials(student.firstName, student.lastName)}
@@ -339,21 +341,30 @@ const StudentCard = ({
         </TouchableOpacity>
       </View>
 
-      <Text className={`font-semibold ${currentTheme.text} mb-2`} numberOfLines={1}>
+      <Text
+        className={`font-semibold ${currentTheme.text} mb-2`}
+        numberOfLines={1}
+      >
         {student.firstName} {student.lastName}
       </Text>
 
       <View className="space-y-2 mb-3">
         <View className="flex-row items-center">
           <Mail size={14} color={currentTheme.textMuted} />
-          <Text className={`text-xs ${currentTheme.textMuted} ml-2 flex-1`} numberOfLines={1}>
+          <Text
+            className={`text-xs ${currentTheme.textMuted} ml-2 flex-1`}
+            numberOfLines={1}
+          >
             {student.email}
           </Text>
         </View>
 
         <View className="flex-row items-center">
           <Phone size={14} color={currentTheme.textMuted} />
-          <Text className={`text-xs ${currentTheme.textMuted} ml-2 flex-1`} numberOfLines={1}>
+          <Text
+            className={`text-xs ${currentTheme.textMuted} ml-2 flex-1`}
+            numberOfLines={1}
+          >
             {student.contact || "N/A"}
           </Text>
         </View>
@@ -361,11 +372,14 @@ const StudentCard = ({
 
       <View className="flex-row justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700">
         <StatusBadge status={student.status || "new"} />
-        
+
         <View className="flex-row items-center">
           <Calendar size={12} color={currentTheme.textMuted} />
           <Text className={`text-xs ${currentTheme.textMuted} ml-1`}>
-            {new Date(student.$createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            {new Date(student.$createdAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })}
           </Text>
         </View>
       </View>
@@ -393,18 +407,20 @@ const StudentDetailModal = ({
 }) => {
   const [theme] = useState<Theme>("dark");
   const currentTheme = themeConfigs[theme];
-  const [activeTab, setActiveTab] = useState<'overview' | 'academic' | 'documents' | 'payments'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "academic" | "documents" | "payments"
+  >("overview");
 
   if (!student) return null;
 
   const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
+    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
     }).format(amount);
   };
@@ -450,44 +466,66 @@ const StudentDetailModal = ({
 
             {/* Tabs */}
             <View className="flex-row border-b border-gray-200 dark:border-gray-700 mb-4">
-              {(['overview', 'academic', 'documents', 'payments'] as const).map((tab) => (
-                <TouchableOpacity
-                  key={tab}
-                  onPress={() => setActiveTab(tab)}
-                  className={`flex-1 py-2 items-center border-b-2 ${activeTab === tab ? 'border-purple-600' : 'border-transparent'}`}
-                >
-                  <Text className={`text-sm font-medium ${activeTab === tab ? 'text-purple-600 dark:text-purple-400' : currentTheme.textMuted}`}>
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {(["overview", "academic", "documents", "payments"] as const).map(
+                (tab) => (
+                  <TouchableOpacity
+                    key={tab}
+                    onPress={() => setActiveTab(tab)}
+                    className={`flex-1 py-2 items-center border-b-2 ${activeTab === tab ? "border-purple-600" : "border-transparent"}`}
+                  >
+                    <Text
+                      className={`text-sm font-medium ${activeTab === tab ? "text-purple-600 dark:text-purple-400" : currentTheme.textMuted}`}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ),
+              )}
             </View>
 
             {/* Tab Content */}
-            {activeTab === 'overview' && (
+            {activeTab === "overview" && (
               <View className="space-y-4">
                 <View className="grid grid-cols-2 gap-3">
                   <View className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
-                    <Text className={`text-xs ${currentTheme.textMuted}`}>Contact</Text>
-                    <Text className={`font-medium ${currentTheme.text}`}>{student.contact || "N/A"}</Text>
+                    <Text className={`text-xs ${currentTheme.textMuted}`}>
+                      Contact
+                    </Text>
+                    <Text className={`font-medium ${currentTheme.text}`}>
+                      {student.contact || "N/A"}
+                    </Text>
                   </View>
                   <View className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
-                    <Text className={`text-xs ${currentTheme.textMuted}`}>Gender</Text>
-                    <Text className={`font-medium ${currentTheme.text}`}>{student.gender || "N/A"}</Text>
+                    <Text className={`text-xs ${currentTheme.textMuted}`}>
+                      Gender
+                    </Text>
+                    <Text className={`font-medium ${currentTheme.text}`}>
+                      {student.gender || "N/A"}
+                    </Text>
                   </View>
                   <View className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
-                    <Text className={`text-xs ${currentTheme.textMuted}`}>Date of Birth</Text>
-                    <Text className={`font-medium ${currentTheme.text}`}>{student.dateOfBirth || "N/A"}</Text>
+                    <Text className={`text-xs ${currentTheme.textMuted}`}>
+                      Date of Birth
+                    </Text>
+                    <Text className={`font-medium ${currentTheme.text}`}>
+                      {student.dateOfBirth || "N/A"}
+                    </Text>
                   </View>
                   <View className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
-                    <Text className={`text-xs ${currentTheme.textMuted}`}>Passport</Text>
-                    <Text className={`font-medium ${currentTheme.text}`}>{student.passportNumber || "N/A"}</Text>
+                    <Text className={`text-xs ${currentTheme.textMuted}`}>
+                      Passport
+                    </Text>
+                    <Text className={`font-medium ${currentTheme.text}`}>
+                      {student.passportNumber || "N/A"}
+                    </Text>
                   </View>
                 </View>
 
                 {student.address && (
                   <View>
-                    <Text className={`font-medium ${currentTheme.text} mb-2`}>Address</Text>
+                    <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                      Address
+                    </Text>
                     <Text className={`text-sm ${currentTheme.text}`}>
                       {student.address}
                       {student.city && `, ${student.city}`}
@@ -499,73 +537,118 @@ const StudentDetailModal = ({
 
                 {student.emergencyContact && (
                   <View>
-                    <Text className={`font-medium ${currentTheme.text} mb-2`}>Emergency Contact</Text>
+                    <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                      Emergency Contact
+                    </Text>
                     <Text className={`text-sm ${currentTheme.text}`}>
-                      {student.emergencyContact} - {student.emergencyContactPhone}
+                      {student.emergencyContact} -{" "}
+                      {student.emergencyContactPhone}
                     </Text>
                   </View>
                 )}
               </View>
             )}
 
-            {activeTab === 'academic' && (
+            {activeTab === "academic" && (
               <View className="space-y-4">
                 <View className="grid grid-cols-2 gap-3">
                   <View className="p-3 rounded-lg bg-blue-100 dark:bg-blue-500/20">
-                    <Text className={`text-xs text-blue-600 dark:text-blue-400`}>Highest Degree</Text>
-                    <Text className={`font-medium ${currentTheme.text}`}>{student.lastDegree || "N/A"}</Text>
+                    <Text
+                      className={`text-xs text-blue-600 dark:text-blue-400`}
+                    >
+                      Highest Degree
+                    </Text>
+                    <Text className={`font-medium ${currentTheme.text}`}>
+                      {student.lastDegree || "N/A"}
+                    </Text>
                   </View>
                   <View className="p-3 rounded-lg bg-green-100 dark:bg-green-500/20">
-                    <Text className={`text-xs text-green-600 dark:text-green-400`}>Bachelor GPA</Text>
-                    <Text className={`font-medium ${currentTheme.text}`}>{student.degreeGPA || "N/A"}</Text>
+                    <Text
+                      className={`text-xs text-green-600 dark:text-green-400`}
+                    >
+                      Bachelor GPA
+                    </Text>
+                    <Text className={`font-medium ${currentTheme.text}`}>
+                      {student.degreeGPA || "N/A"}
+                    </Text>
                   </View>
                   <View className="p-3 rounded-lg bg-yellow-100 dark:bg-yellow-500/20">
-                    <Text className={`text-xs text-yellow-600 dark:text-yellow-400`}>+2 GPA</Text>
-                    <Text className={`font-medium ${currentTheme.text}`}>{student.plusTwoGPA || "N/A"}</Text>
+                    <Text
+                      className={`text-xs text-yellow-600 dark:text-yellow-400`}
+                    >
+                      +2 GPA
+                    </Text>
+                    <Text className={`font-medium ${currentTheme.text}`}>
+                      {student.plusTwoGPA || "N/A"}
+                    </Text>
                   </View>
                   <View className="p-3 rounded-lg bg-purple-100 dark:bg-purple-500/20">
-                    <Text className={`text-xs text-purple-600 dark:text-purple-400`}>High School GPA</Text>
-                    <Text className={`font-medium ${currentTheme.text}`}>{student.highSchoolGPA || "N/A"}</Text>
+                    <Text
+                      className={`text-xs text-purple-600 dark:text-purple-400`}
+                    >
+                      High School GPA
+                    </Text>
+                    <Text className={`font-medium ${currentTheme.text}`}>
+                      {student.highSchoolGPA || "N/A"}
+                    </Text>
                   </View>
                 </View>
 
                 {student.currentInstitution && (
                   <View>
-                    <Text className={`font-medium ${currentTheme.text} mb-2`}>Current Institution</Text>
-                    <Text className={`text-sm ${currentTheme.text}`}>{student.currentInstitution}</Text>
+                    <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                      Current Institution
+                    </Text>
+                    <Text className={`text-sm ${currentTheme.text}`}>
+                      {student.currentInstitution}
+                    </Text>
                   </View>
                 )}
 
                 {student.academicQualification && (
                   <View>
-                    <Text className={`font-medium ${currentTheme.text} mb-2`}>Academic Qualification</Text>
-                    <Text className={`text-sm ${currentTheme.text}`}>{student.academicQualification}</Text>
+                    <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                      Academic Qualification
+                    </Text>
+                    <Text className={`text-sm ${currentTheme.text}`}>
+                      {student.academicQualification}
+                    </Text>
                   </View>
                 )}
               </View>
             )}
 
-            {activeTab === 'documents' && (
+            {activeTab === "documents" && (
               <View className="space-y-4">
                 {student.documentsTemplatesFull ? (
                   <View>
-                    <Text className={`font-medium ${currentTheme.text} mb-2`}>Document Template</Text>
+                    <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                      Document Template
+                    </Text>
                     <View className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
                       <Text className={`font-medium ${currentTheme.text}`}>
                         {student.documentsTemplatesFull.templateName}
                       </Text>
-                      <Text className={`text-xs ${currentTheme.textMuted} mt-1`}>
-                        {student.documentsTemplatesFull.templateItems?.length || 0} required items
+                      <Text
+                        className={`text-xs ${currentTheme.textMuted} mt-1`}
+                      >
+                        {student.documentsTemplatesFull.templateItems?.length ||
+                          0}{" "}
+                        required items
                       </Text>
                     </View>
                   </View>
                 ) : (
                   <View className="items-center py-8">
                     <FileText size={48} color={currentTheme.textMuted} />
-                    <Text className={`text-lg font-medium mt-4 ${currentTheme.text}`}>
+                    <Text
+                      className={`text-lg font-medium mt-4 ${currentTheme.text}`}
+                    >
                       No Document Template
                     </Text>
-                    <Text className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}>
+                    <Text
+                      className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}
+                    >
                       Assign a document template to track required documents
                     </Text>
                   </View>
@@ -573,40 +656,68 @@ const StudentDetailModal = ({
               </View>
             )}
 
-            {activeTab === 'payments' && (
+            {activeTab === "payments" && (
               <View className="space-y-4">
                 {student.paymentTemplateFull ? (
                   <View>
-                    <Text className={`font-medium ${currentTheme.text} mb-2`}>Payment Template</Text>
+                    <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                      Payment Template
+                    </Text>
                     <View className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800 mb-4">
                       <Text className={`font-medium ${currentTheme.text}`}>
                         {student.paymentTemplateFull.templateName}
                       </Text>
-                      <Text className={`text-xs ${currentTheme.textMuted} mt-1`}>
-                        {student.paymentTemplateFull.items?.length || 0} payment items
+                      <Text
+                        className={`text-xs ${currentTheme.textMuted} mt-1`}
+                      >
+                        {student.paymentTemplateFull.items?.length || 0} payment
+                        items
                       </Text>
-                      <Text className={`text-sm font-bold text-green-600 dark:text-green-400 mt-2`}>
-                        Total: {formatCurrency(student.paymentTemplateFull.totalAmount || 
-                          student.paymentTemplateFull.items?.reduce((sum: number, item: any) => sum + (item.amount || 0), 0) || 0)}
+                      <Text
+                        className={`text-sm font-bold text-green-600 dark:text-green-400 mt-2`}
+                      >
+                        Total:{" "}
+                        {formatCurrency(
+                          student.paymentTemplateFull.totalAmount ||
+                            student.paymentTemplateFull.items?.reduce(
+                              (sum: number, item: any) =>
+                                sum + (item.amount || 0),
+                              0,
+                            ) ||
+                            0,
+                        )}
                       </Text>
                     </View>
 
-                    {student.paymentTemplateFull.items?.map((item: any, index: number) => (
-                      <View key={index} className="flex-row justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700">
-                        <Text className={`text-sm ${currentTheme.text}`}>{item.label || item.name}</Text>
-                        <Text className={`text-sm font-medium ${currentTheme.text}`}>
-                          {formatCurrency(item.amount || 0)}
-                        </Text>
-                      </View>
-                    ))}
+                    {student.paymentTemplateFull.items?.map(
+                      (item: any, index: number) => (
+                        <View
+                          key={index}
+                          className="flex-row justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700"
+                        >
+                          <Text className={`text-sm ${currentTheme.text}`}>
+                            {item.label || item.name}
+                          </Text>
+                          <Text
+                            className={`text-sm font-medium ${currentTheme.text}`}
+                          >
+                            {formatCurrency(item.amount || 0)}
+                          </Text>
+                        </View>
+                      ),
+                    )}
                   </View>
                 ) : (
                   <View className="items-center py-8">
                     <CreditCard size={48} color={currentTheme.textMuted} />
-                    <Text className={`text-lg font-medium mt-4 ${currentTheme.text}`}>
+                    <Text
+                      className={`text-lg font-medium mt-4 ${currentTheme.text}`}
+                    >
                       No Payment Template
                     </Text>
-                    <Text className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}>
+                    <Text
+                      className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}
+                    >
                       Assign a payment template to track payments
                     </Text>
                   </View>
@@ -623,7 +734,7 @@ const StudentDetailModal = ({
             >
               <Text className="text-white font-medium">Edit</Text>
             </TouchableOpacity>
-            
+
             {student.status === "new" && (
               <TouchableOpacity
                 onPress={() => onUpgrade(student)}
@@ -632,7 +743,7 @@ const StudentDetailModal = ({
                 <Text className="text-white font-medium">Upgrade</Text>
               </TouchableOpacity>
             )}
-            
+
             {student.status === "in_process" && (
               <TouchableOpacity
                 onPress={() => onGeneratePortal(student)}
@@ -641,7 +752,7 @@ const StudentDetailModal = ({
                 <Text className="text-white font-medium">Portal</Text>
               </TouchableOpacity>
             )}
-            
+
             <TouchableOpacity
               onPress={() => onDelete(student.$id)}
               className="flex-1 py-3 bg-red-600 rounded-xl items-center"
@@ -684,7 +795,10 @@ const StudentModal = ({
   documentTemplates: DocumentTemplate[];
   paymentTemplates: PaymentTemplate[];
   mode?: "create" | "edit" | "upgrade";
-  onUpgradeToInProcess?: (studentId: string, templateData: { paymentTemplateId: string; documentTemplateId: string }) => void;
+  onUpgradeToInProcess?: (
+    studentId: string,
+    templateData: { paymentTemplateId: string; documentTemplateId: string },
+  ) => void;
   isSaving?: boolean;
 }) => {
   const [theme] = useState<Theme>("dark");
@@ -729,21 +843,26 @@ const StudentModal = ({
     workExperience: "",
   });
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
-  const [selectedDocumentTemplate, setSelectedDocumentTemplate] = useState<string>("");
-  const [selectedPaymentTemplate, setSelectedPaymentTemplate] = useState<string>("");
+  const [selectedDocumentTemplate, setSelectedDocumentTemplate] =
+    useState<string>("");
+  const [selectedPaymentTemplate, setSelectedPaymentTemplate] =
+    useState<string>("");
   const [skipUniversity, setSkipUniversity] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const getSteps = () => {
-    if (mode === 'upgrade') {
+    if (mode === "upgrade") {
       return [
-        { title: "Templates", description: "Assign document & payment templates" },
+        {
+          title: "Templates",
+          description: "Assign document & payment templates",
+        },
         { title: "Review", description: "Confirm upgrade to in_process" },
       ];
     }
-    
+
     return [
       { title: "Personal Info", description: "Basic details & avatar" },
       { title: "Academic Info", description: "Education history & GPA" },
@@ -791,7 +910,10 @@ const StudentModal = ({
         currentCourse: student.currentCourse || "",
         graduationYear: student.graduationYear?.toString() || "",
         academicQualification: student.academicQualification || "",
-        testScores: typeof student.testScores === 'object' ? JSON.stringify(student.testScores) : student.testScores || "",
+        testScores:
+          typeof student.testScores === "object"
+            ? JSON.stringify(student.testScores)
+            : student.testScores || "",
         achievements: student.achievements || "",
         extracurricularActivities: student.extracurricularActivities || "",
         workExperience: student.workExperience || "",
@@ -805,10 +927,14 @@ const StudentModal = ({
   }, [student, isOpen, mode]);
 
   const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
     if (permissionResult.granted === false) {
-      Alert.alert("Permission required", "Permission to access camera roll is required!");
+      Alert.alert(
+        "Permission required",
+        "Permission to access camera roll is required!",
+      );
       return;
     }
 
@@ -829,11 +955,11 @@ const StudentModal = ({
   };
 
   const handleSubmit = async () => {
-    if (mode === 'upgrade') {
+    if (mode === "upgrade") {
       if (currentStep === steps.length - 1 && student && onUpgradeToInProcess) {
         onUpgradeToInProcess(student.$id, {
           paymentTemplateId: selectedPaymentTemplate,
-          documentTemplateId: selectedDocumentTemplate
+          documentTemplateId: selectedDocumentTemplate,
         });
       } else {
         nextStep();
@@ -869,7 +995,7 @@ const StudentModal = ({
   };
 
   const renderStepContent = () => {
-    if (mode === 'upgrade') {
+    if (mode === "upgrade") {
       switch (currentStep) {
         case 0:
           return (
@@ -882,7 +1008,11 @@ const StudentModal = ({
                   </Text>
                 </View>
                 <Text className="text-sm text-yellow-700 dark:text-yellow-400">
-                  You are about to move <Text className="font-bold">{student?.firstName} {student?.lastName}</Text> to <Text className="font-bold">In-Process</Text> status.
+                  You are about to move{" "}
+                  <Text className="font-bold">
+                    {student?.firstName} {student?.lastName}
+                  </Text>{" "}
+                  to <Text className="font-bold">In-Process</Text> status.
                 </Text>
               </View>
 
@@ -896,7 +1026,7 @@ const StudentModal = ({
                     <Text className="text-white text-sm">Create New</Text>
                   </TouchableOpacity>
                 </View>
-                
+
                 <ScrollView className="max-h-48 border rounded-lg p-3 space-y-2 bg-gray-100 dark:bg-gray-800">
                   {documentTemplates.filter((t) => t.isActive).length === 0 ? (
                     <Text className="text-sm text-center p-2 text-gray-500">
@@ -908,28 +1038,36 @@ const StudentModal = ({
                       .map((template) => (
                         <TouchableOpacity
                           key={template.$id}
-                          onPress={() => setSelectedDocumentTemplate(template.$id)}
+                          onPress={() =>
+                            setSelectedDocumentTemplate(template.$id)
+                          }
                           className={`p-3 rounded-lg border ${
                             selectedDocumentTemplate === template.$id
-                              ? 'bg-purple-100 dark:bg-purple-500/20 border-purple-300 dark:border-purple-700'
-                              : 'border-transparent'
+                              ? "bg-purple-100 dark:bg-purple-500/20 border-purple-300 dark:border-purple-700"
+                              : "border-transparent"
                           }`}
                         >
                           <View className="flex-row items-center gap-3">
-                            <View className={`w-4 h-4 rounded-full border ${
-                              selectedDocumentTemplate === template.$id
-                                ? 'bg-purple-600 border-purple-600'
-                                : 'border-gray-400'
-                            } items-center justify-center`}>
+                            <View
+                              className={`w-4 h-4 rounded-full border ${
+                                selectedDocumentTemplate === template.$id
+                                  ? "bg-purple-600 border-purple-600"
+                                  : "border-gray-400"
+                              } items-center justify-center`}
+                            >
                               {selectedDocumentTemplate === template.$id && (
                                 <Check size={10} color="white" />
                               )}
                             </View>
                             <View className="flex-1">
-                              <Text className={`font-medium ${currentTheme.text}`}>
+                              <Text
+                                className={`font-medium ${currentTheme.text}`}
+                              >
                                 {template.templateName}
                               </Text>
-                              <Text className={`text-xs ${currentTheme.textMuted}`}>
+                              <Text
+                                className={`text-xs ${currentTheme.textMuted}`}
+                              >
                                 {template.templateItems?.length || 0} items
                               </Text>
                             </View>
@@ -950,7 +1088,7 @@ const StudentModal = ({
                     <Text className="text-white text-sm">Create New</Text>
                   </TouchableOpacity>
                 </View>
-                
+
                 <ScrollView className="max-h-48 border rounded-lg p-3 space-y-2 bg-gray-100 dark:bg-gray-800">
                   {paymentTemplates.filter((t) => t.isActive).length === 0 ? (
                     <Text className="text-sm text-center p-2 text-gray-500">
@@ -962,30 +1100,38 @@ const StudentModal = ({
                       .map((template) => (
                         <TouchableOpacity
                           key={template.$id}
-                          onPress={() => setSelectedPaymentTemplate(template.$id)}
+                          onPress={() =>
+                            setSelectedPaymentTemplate(template.$id)
+                          }
                           className={`p-3 rounded-lg border ${
                             selectedPaymentTemplate === template.$id
-                              ? 'bg-purple-100 dark:bg-purple-500/20 border-purple-300 dark:border-purple-700'
-                              : 'border-transparent'
+                              ? "bg-purple-100 dark:bg-purple-500/20 border-purple-300 dark:border-purple-700"
+                              : "border-transparent"
                           }`}
                         >
                           <View className="flex-row items-center gap-3">
-                            <View className={`w-4 h-4 rounded-full border ${
-                              selectedPaymentTemplate === template.$id
-                                ? 'bg-purple-600 border-purple-600'
-                                : 'border-gray-400'
-                            } items-center justify-center`}>
+                            <View
+                              className={`w-4 h-4 rounded-full border ${
+                                selectedPaymentTemplate === template.$id
+                                  ? "bg-purple-600 border-purple-600"
+                                  : "border-gray-400"
+                              } items-center justify-center`}
+                            >
                               {selectedPaymentTemplate === template.$id && (
                                 <Check size={10} color="white" />
                               )}
                             </View>
                             <View className="flex-1">
-                              <Text className={`font-medium ${currentTheme.text}`}>
+                              <Text
+                                className={`font-medium ${currentTheme.text}`}
+                              >
                                 {template.templateName}
                               </Text>
-                              <Text className={`text-xs ${currentTheme.textMuted}`}>
-                                {template.items?.length || 0} items • 
-                                Total: ${template.totalAmount || 0}
+                              <Text
+                                className={`text-xs ${currentTheme.textMuted}`}
+                              >
+                                {template.items?.length || 0} items • Total: $
+                                {template.totalAmount || 0}
                               </Text>
                             </View>
                           </View>
@@ -1005,17 +1151,23 @@ const StudentModal = ({
                 </Text>
                 <View className="space-y-3">
                   <View className="flex-row justify-between">
-                    <Text className={`font-medium ${currentTheme.text}`}>Student:</Text>
+                    <Text className={`font-medium ${currentTheme.text}`}>
+                      Student:
+                    </Text>
                     <Text className={`font-semibold ${currentTheme.text}`}>
                       {student?.firstName} {student?.lastName}
                     </Text>
                   </View>
                   <View className="flex-row justify-between">
-                    <Text className={`font-medium ${currentTheme.text}`}>Current Status:</Text>
+                    <Text className={`font-medium ${currentTheme.text}`}>
+                      Current Status:
+                    </Text>
                     <StatusBadge status={student?.status || "new"} />
                   </View>
                   <View className="flex-row justify-between">
-                    <Text className={`font-medium ${currentTheme.text}`}>New Status:</Text>
+                    <Text className={`font-medium ${currentTheme.text}`}>
+                      New Status:
+                    </Text>
                     <View className="px-3 py-1 bg-yellow-100 dark:bg-yellow-500/20 rounded-full">
                       <Text className="text-yellow-800 dark:text-yellow-400 font-semibold">
                         in_process
@@ -1040,39 +1192,53 @@ const StudentModal = ({
         <Text className={`text-sm ${currentTheme.textMuted} mb-6`}>
           {steps[currentStep].description}
         </Text>
-        
+
         {currentStep === 0 && (
           <View className="space-y-4">
             <View className="items-center">
               <TouchableOpacity onPress={pickImage} className="mb-4">
                 {avatarPreview ? (
-                  <Image source={{ uri: avatarPreview }} className="w-32 h-32 rounded-full" />
+                  <Image
+                    source={{ uri: avatarPreview }}
+                    className="w-32 h-32 rounded-full"
+                  />
                 ) : (
                   <View className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 items-center justify-center">
                     <User size={48} color={currentTheme.textMuted} />
                   </View>
                 )}
               </TouchableOpacity>
-              <TouchableOpacity onPress={pickImage} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">
+              <TouchableOpacity
+                onPress={pickImage}
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg"
+              >
                 <Text className={currentTheme.text}>Upload Photo</Text>
               </TouchableOpacity>
             </View>
 
             <View className="grid grid-cols-2 gap-4">
               <View>
-                <Text className={`font-medium ${currentTheme.text} mb-2`}>First Name *</Text>
+                <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                  First Name *
+                </Text>
                 <TextInput
                   value={formData.firstName}
-                  onChangeText={(text) => setFormData({ ...formData, firstName: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, firstName: text })
+                  }
                   className={`px-3 py-2 rounded-lg border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                   placeholder="Enter first name"
                 />
               </View>
               <View>
-                <Text className={`font-medium ${currentTheme.text} mb-2`}>Last Name *</Text>
+                <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                  Last Name *
+                </Text>
                 <TextInput
                   value={formData.lastName}
-                  onChangeText={(text) => setFormData({ ...formData, lastName: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, lastName: text })
+                  }
                   className={`px-3 py-2 rounded-lg border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                   placeholder="Enter last name"
                 />
@@ -1080,10 +1246,14 @@ const StudentModal = ({
             </View>
 
             <View>
-              <Text className={`font-medium ${currentTheme.text} mb-2`}>Email *</Text>
+              <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                Email *
+              </Text>
               <TextInput
                 value={formData.email}
-                onChangeText={(text) => setFormData({ ...formData, email: text })}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, email: text })
+                }
                 keyboardType="email-address"
                 autoCapitalize="none"
                 className={`px-3 py-2 rounded-lg border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
@@ -1092,19 +1262,27 @@ const StudentModal = ({
             </View>
 
             <View>
-              <Text className={`font-medium ${currentTheme.text} mb-2`}>Gender *</Text>
+              <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                Gender *
+              </Text>
               <View className="flex-row gap-2">
-                {['male', 'female', 'other'].map((gender) => (
+                {["male", "female", "other"].map((gender) => (
                   <TouchableOpacity
                     key={gender}
                     onPress={() => setFormData({ ...formData, gender })}
                     className={`flex-1 py-2 rounded-lg border items-center ${
                       formData.gender === gender
-                        ? 'border-purple-600 bg-purple-100 dark:bg-purple-500/20'
+                        ? "border-purple-600 bg-purple-100 dark:bg-purple-500/20"
                         : currentTheme.border
                     }`}
                   >
-                    <Text className={formData.gender === gender ? 'text-purple-600 dark:text-purple-400 font-medium' : currentTheme.text}>
+                    <Text
+                      className={
+                        formData.gender === gender
+                          ? "text-purple-600 dark:text-purple-400 font-medium"
+                          : currentTheme.text
+                      }
+                    >
                       {gender.charAt(0).toUpperCase() + gender.slice(1)}
                     </Text>
                   </TouchableOpacity>
@@ -1117,10 +1295,14 @@ const StudentModal = ({
         {currentStep === 1 && (
           <View className="space-y-4">
             <View>
-              <Text className={`font-medium ${currentTheme.text} mb-2`}>Highest Degree</Text>
+              <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                Highest Degree
+              </Text>
               <TextInput
                 value={formData.lastDegree}
-                onChangeText={(text) => setFormData({ ...formData, lastDegree: text })}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, lastDegree: text })
+                }
                 className={`px-3 py-2 rounded-lg border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                 placeholder="e.g., Bachelor's Degree"
               />
@@ -1128,20 +1310,28 @@ const StudentModal = ({
 
             <View className="grid grid-cols-2 gap-4">
               <View>
-                <Text className={`font-medium ${currentTheme.text} mb-2`}>Bachelor's GPA</Text>
+                <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                  Bachelor's GPA
+                </Text>
                 <TextInput
                   value={formData.degreeGPA}
-                  onChangeText={(text) => setFormData({ ...formData, degreeGPA: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, degreeGPA: text })
+                  }
                   keyboardType="numeric"
                   className={`px-3 py-2 rounded-lg border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                   placeholder="e.g., 3.5"
                 />
               </View>
               <View>
-                <Text className={`font-medium ${currentTheme.text} mb-2`}>+2 GPA</Text>
+                <Text className={`font-medium ${currentTheme.text} mb-2`}>
+                  +2 GPA
+                </Text>
                 <TextInput
                   value={formData.plusTwoGPA}
-                  onChangeText={(text) => setFormData({ ...formData, plusTwoGPA: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, plusTwoGPA: text })
+                  }
                   keyboardType="numeric"
                   className={`px-3 py-2 rounded-lg border ${currentTheme.border} ${currentTheme.text} ${currentTheme.card}`}
                   placeholder="e.g., 3.2"
@@ -1167,9 +1357,11 @@ const StudentModal = ({
           <View className="flex-row justify-between items-center mb-6">
             <View>
               <Text className={`text-xl font-bold ${currentTheme.text}`}>
-                {mode === 'upgrade' 
-                  ? 'Upgrade Student' 
-                  : student ? "Edit Student" : "Add New Student"}
+                {mode === "upgrade"
+                  ? "Upgrade Student"
+                  : student
+                    ? "Edit Student"
+                    : "Add New Student"}
               </Text>
               <Text className={`text-sm ${currentTheme.textMuted} mt-1`}>
                 Step {currentStep + 1} of {steps.length}
@@ -1183,24 +1375,30 @@ const StudentModal = ({
           <View className="flex-row justify-between mb-6">
             {steps.map((step, index) => (
               <View key={index} className="items-center">
-                <View className={`w-8 h-8 rounded-full items-center justify-center ${
-                  index < currentStep
-                    ? "bg-green-500"
-                    : index === currentStep
-                    ? "bg-purple-600"
-                    : "bg-gray-300 dark:bg-gray-700"
-                }`}>
+                <View
+                  className={`w-8 h-8 rounded-full items-center justify-center ${
+                    index < currentStep
+                      ? "bg-green-500"
+                      : index === currentStep
+                        ? "bg-purple-600"
+                        : "bg-gray-300 dark:bg-gray-700"
+                  }`}
+                >
                   {index < currentStep ? (
                     <Check size={16} color="white" />
                   ) : (
-                    <Text className={`text-sm font-medium ${
-                      index === currentStep ? "text-white" : currentTheme.text
-                    }`}>
+                    <Text
+                      className={`text-sm font-medium ${
+                        index === currentStep ? "text-white" : currentTheme.text
+                      }`}
+                    >
                       {index + 1}
                     </Text>
                   )}
                 </View>
-                <Text className={`text-xs mt-2 ${index === currentStep ? "text-purple-600 dark:text-purple-400 font-medium" : currentTheme.textMuted}`}>
+                <Text
+                  className={`text-xs mt-2 ${index === currentStep ? "text-purple-600 dark:text-purple-400 font-medium" : currentTheme.textMuted}`}
+                >
                   {step.title}
                 </Text>
               </View>
@@ -1219,7 +1417,7 @@ const StudentModal = ({
             >
               <Text className={currentTheme.text}>Previous</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               onPress={handleSubmit}
               disabled={isSaving}
@@ -1230,11 +1428,11 @@ const StudentModal = ({
               ) : (
                 <Text className="text-white font-medium">
                   {currentStep === steps.length - 1
-                    ? mode === 'upgrade'
+                    ? mode === "upgrade"
                       ? "Upgrade Student"
                       : student
-                      ? "Update Student"
-                      : "Create Student"
+                        ? "Update Student"
+                        : "Create Student"
                     : "Next"}
                 </Text>
               )}
@@ -1265,7 +1463,7 @@ const PortalLinkModal = ({
 
   if (!student) return null;
 
-  const portalUrl = student.studentAccessToken 
+  const portalUrl = student.studentAccessToken
     ? `${API_URL}/students/portal/${student.studentAccessToken}`
     : "";
 
@@ -1329,7 +1527,9 @@ const PortalLinkModal = ({
                 {showQR ? "QR Code" : "Student Portal"}
               </Text>
               <Text className={`text-sm ${currentTheme.textMuted} mt-1`}>
-                {showQR ? "Scan to access portal" : "Manage student portal access"}
+                {showQR
+                  ? "Scan to access portal"
+                  : "Manage student portal access"}
               </Text>
             </View>
             <TouchableOpacity onPress={onClose}>
@@ -1341,7 +1541,8 @@ const PortalLinkModal = ({
             <View className="items-center mb-6">
               <View className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 items-center justify-center mb-3">
                 <Text className="text-white text-xl font-bold">
-                  {student.firstName?.[0]}{student.lastName?.[0]}
+                  {student.firstName?.[0]}
+                  {student.lastName?.[0]}
                 </Text>
               </View>
               <Text className={`text-lg font-bold ${currentTheme.text}`}>
@@ -1355,10 +1556,14 @@ const PortalLinkModal = ({
             {!portalUrl ? (
               <View className="items-center py-6">
                 <AlertTriangle size={48} color={currentTheme.textMuted} />
-                <Text className={`text-lg font-medium mt-4 ${currentTheme.text}`}>
+                <Text
+                  className={`text-lg font-medium mt-4 ${currentTheme.text}`}
+                >
                   No Portal Access
                 </Text>
-                <Text className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}>
+                <Text
+                  className={`text-sm ${currentTheme.textMuted} mt-2 text-center`}
+                >
                   This student doesn't have portal access enabled yet.
                 </Text>
               </View>
@@ -1439,9 +1644,7 @@ const PortalLinkModal = ({
                     ) : (
                       <Download size={20} color="white" />
                     )}
-                    <Text className="text-white font-medium">
-                      Download QR
-                    </Text>
+                    <Text className="text-white font-medium">Download QR</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -1490,8 +1693,12 @@ export default function StudentsPage() {
   const [countries, setCountries] = useState<any[]>([]);
   const [universities, setUniversities] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
-  const [documentTemplates, setDocumentTemplates] = useState<DocumentTemplate[]>([]);
-  const [paymentTemplates, setPaymentTemplates] = useState<PaymentTemplate[]>([]);
+  const [documentTemplates, setDocumentTemplates] = useState<
+    DocumentTemplate[]
+  >([]);
+  const [paymentTemplates, setPaymentTemplates] = useState<PaymentTemplate[]>(
+    [],
+  );
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
@@ -1505,9 +1712,12 @@ export default function StudentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | undefined>();
-  const [modalMode, setModalMode] = useState<"create" | "edit" | "upgrade">("create");
+  const [modalMode, setModalMode] = useState<"create" | "edit" | "upgrade">(
+    "create",
+  );
   const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [selectedStudentDetail, setSelectedStudentDetail] = useState<Student | null>(null);
+  const [selectedStudentDetail, setSelectedStudentDetail] =
+    useState<Student | null>(null);
   const [portalModalOpen, setPortalModalOpen] = useState(false);
   const [isCreatingStudent, setIsCreatingStudent] = useState(false);
   const [isUpgradingStudent, setIsUpgradingStudent] = useState(false);
@@ -1527,18 +1737,18 @@ export default function StudentsPage() {
         type === "success"
           ? Haptics.NotificationFeedbackType.Success
           : type === "error"
-          ? Haptics.NotificationFeedbackType.Error
-          : Haptics.NotificationFeedbackType.Warning
+            ? Haptics.NotificationFeedbackType.Error
+            : Haptics.NotificationFeedbackType.Warning,
       );
     },
-    []
+    [],
   );
 
   const cachedFetch = useCallback(
     async <T,>(
       url: string,
       cacheKey: string,
-      ttl: number = 5 * 60 * 1000
+      ttl: number = 5 * 60 * 1000,
     ): Promise<T> => {
       const cachedData = cacheManager.get<T>(cacheKey);
       if (cachedData) {
@@ -1555,7 +1765,7 @@ export default function StudentsPage() {
         throw new Error(result.error || "Fetch failed");
       }
     },
-    []
+    [],
   );
 
   const fetchStudents = async (isBackgroundUpdate = false) => {
@@ -1574,7 +1784,11 @@ export default function StudentsPage() {
           : ""
       }`;
 
-      const studentsData = await cachedFetch<Student[]>(url, cacheKey, 2 * 60 * 1000);
+      const studentsData = await cachedFetch<Student[]>(
+        url,
+        cacheKey,
+        2 * 60 * 1000,
+      );
       setStudents(studentsData || []);
       setSelectedStudents([]);
     } catch (error) {
@@ -1591,7 +1805,11 @@ export default function StudentsPage() {
 
   const fetchUsers = async () => {
     try {
-      const usersData = await cachedFetch<User[]>("/dashboard/users", "users", 10 * 60 * 1000);
+      const usersData = await cachedFetch<User[]>(
+        "/dashboard/users",
+        "users",
+        10 * 60 * 1000,
+      );
       setUsers(usersData || []);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -1601,7 +1819,11 @@ export default function StudentsPage() {
 
   const fetchBranches = async () => {
     try {
-      const branchesData = await cachedFetch<Branch[]>("/dashboard/branches/list", "branches", 30 * 60 * 1000);
+      const branchesData = await cachedFetch<Branch[]>(
+        "/dashboard/branches/list",
+        "branches",
+        30 * 60 * 1000,
+      );
       setBranches(branchesData || []);
     } catch (error) {
       console.error("Error fetching branches:", error);
@@ -1611,7 +1833,11 @@ export default function StudentsPage() {
 
   const fetchCountries = async () => {
     try {
-      const countriesData = await cachedFetch<any[]>("/dashboard/countries", "countries", 30 * 60 * 1000);
+      const countriesData = await cachedFetch<any[]>(
+        "/dashboard/countries",
+        "countries",
+        30 * 60 * 1000,
+      );
       setCountries(countriesData || []);
     } catch (error) {
       console.error("Error fetching countries:", error);
@@ -1621,7 +1847,11 @@ export default function StudentsPage() {
 
   const fetchDocumentTemplates = async () => {
     try {
-      const templatesData = await cachedFetch<DocumentTemplate[]>("/dashboard/documentTemplates", "documentTemplates", 5 * 60 * 1000);
+      const templatesData = await cachedFetch<DocumentTemplate[]>(
+        "/dashboard/documentTemplates",
+        "documentTemplates",
+        5 * 60 * 1000,
+      );
       setDocumentTemplates(templatesData || []);
     } catch (error) {
       console.error("Error fetching document templates:", error);
@@ -1631,7 +1861,11 @@ export default function StudentsPage() {
 
   const fetchPaymentTemplates = async () => {
     try {
-      const templatesData = await cachedFetch<PaymentTemplate[]>("/dashboard/paymentsTemplates", "paymentTemplates", 5 * 60 * 1000);
+      const templatesData = await cachedFetch<PaymentTemplate[]>(
+        "/dashboard/paymentsTemplates",
+        "paymentTemplates",
+        5 * 60 * 1000,
+      );
       setPaymentTemplates(templatesData || []);
     } catch (error) {
       console.error("Error fetching payment templates:", error);
@@ -1682,13 +1916,13 @@ export default function StudentsPage() {
     if (selectedStudents.length === filteredStudents.length) {
       setSelectedStudents([]);
     } else {
-      setSelectedStudents(filteredStudents.map(s => s.$id));
+      setSelectedStudents(filteredStudents.map((s) => s.$id));
     }
   };
 
   const handleSelectStudent = (studentId: string) => {
     if (selectedStudents.includes(studentId)) {
-      setSelectedStudents(selectedStudents.filter(id => id !== studentId));
+      setSelectedStudents(selectedStudents.filter((id) => id !== studentId));
     } else {
       setSelectedStudents([...selectedStudents, studentId]);
     }
@@ -1715,25 +1949,31 @@ export default function StudentsPage() {
           style: "destructive",
           onPress: () => performBulkDelete(),
         },
-      ]
+      ],
     );
   };
 
   const performBulkDelete = async () => {
     try {
       setIsBulkDeleting(true);
-      const response = await fetch(`${API_URL}/dashboard/students/bulk-delete`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${API_URL}/dashboard/students/bulk-delete`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ studentIds: selectedStudents }),
         },
-        body: JSON.stringify({ studentIds: selectedStudents }),
-      });
+      );
 
       const result = await response.json();
 
       if (result.success) {
-        showToast(`Successfully deleted ${result.data.deletedCount} student(s)`, "success");
+        showToast(
+          `Successfully deleted ${result.data.deletedCount} student(s)`,
+          "success",
+        );
         setSelectedStudents([]);
         cacheManager.delete("students");
         fetchEssentialData();
@@ -1748,7 +1988,9 @@ export default function StudentsPage() {
     }
   };
 
-  const handleCreateStudent = async (formData: StudentFormData & { avatar?: File }) => {
+  const handleCreateStudent = async (
+    formData: StudentFormData & { avatar?: File },
+  ) => {
     try {
       setIsCreatingStudent(true);
 
@@ -1786,7 +2028,9 @@ export default function StudentsPage() {
     }
   };
 
-  const handleEditStudent = async (formData: StudentFormData & { avatar?: File }) => {
+  const handleEditStudent = async (
+    formData: StudentFormData & { avatar?: File },
+  ) => {
     if (!editingStudent) return;
 
     try {
@@ -1802,10 +2046,13 @@ export default function StudentsPage() {
         formDataToSend.append("avatar", formData.avatar);
       }
 
-      const response = await fetch(`${API_URL}/dashboard/students/${editingStudent.$id}`, {
-        method: "PATCH",
-        body: formDataToSend,
-      });
+      const response = await fetch(
+        `${API_URL}/dashboard/students/${editingStudent.$id}`,
+        {
+          method: "PATCH",
+          body: formDataToSend,
+        },
+      );
 
       const result = await response.json();
 
@@ -1826,7 +2073,7 @@ export default function StudentsPage() {
 
   const handleUpgradeToInProcess = async (
     studentId: string,
-    templateData: { paymentTemplateId: string; documentTemplateId: string }
+    templateData: { paymentTemplateId: string; documentTemplateId: string },
   ) => {
     try {
       setIsUpgradingStudent(true);
@@ -1836,13 +2083,16 @@ export default function StudentsPage() {
         documentTemplateId: templateData.documentTemplateId,
       };
 
-      const response = await fetch(`${API_URL}/dashboard/students/${studentId}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${API_URL}/dashboard/students/${studentId}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       const result = await response.json();
 
@@ -1865,7 +2115,9 @@ export default function StudentsPage() {
     }
   };
 
-  const handleModalSave = async (formData: StudentFormData & { avatar?: File }) => {
+  const handleModalSave = async (
+    formData: StudentFormData & { avatar?: File },
+  ) => {
     if (modalMode === "upgrade" && editingStudent) {
       await handleUpgradeToInProcess(editingStudent.$id, {
         paymentTemplateId: formData.paymentTemplates,
@@ -1894,15 +2146,18 @@ export default function StudentsPage() {
           style: "destructive",
           onPress: () => performDelete(studentId),
         },
-      ]
+      ],
     );
   };
 
   const performDelete = async (studentId: string) => {
     try {
-      const response = await fetch(`${API_URL}/dashboard/students/${studentId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `${API_URL}/dashboard/students/${studentId}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       const result = await response.json();
 
@@ -1958,23 +2213,24 @@ export default function StudentsPage() {
   };
 
   const handleStudentMorePress = (student: Student) => {
-    Alert.alert(
-      "Student Actions",
-      "Choose an action",
-      [
-        { text: "View Details", onPress: () => openDetailModal(student) },
-        { text: "Edit", onPress: () => openEditModal(student) },
-        { text: "Upgrade", onPress: () => openUpgradeModal(student) },
-        { text: "Generate Portal", onPress: () => openPortalModal(student) },
-        { text: "Delete", style: "destructive", onPress: () => handleDeleteStudent(student.$id) },
-        { text: "Cancel", style: "cancel" },
-      ]
-    );
+    Alert.alert("Student Actions", "Choose an action", [
+      { text: "View Details", onPress: () => openDetailModal(student) },
+      { text: "Edit", onPress: () => openEditModal(student) },
+      { text: "Upgrade", onPress: () => openUpgradeModal(student) },
+      { text: "Generate Portal", onPress: () => openPortalModal(student) },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => handleDeleteStudent(student.$id),
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
   };
 
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {
-      if (statusFilter !== "all" && student.status !== statusFilter) return false;
+      if (statusFilter !== "all" && student.status !== statusFilter)
+        return false;
       if (!searchQuery) return true;
 
       const searchLower = searchQuery.toLowerCase();
@@ -1982,8 +2238,10 @@ export default function StudentsPage() {
         student.firstName.toLowerCase().includes(searchLower) ||
         student.lastName.toLowerCase().includes(searchLower) ||
         student.email.toLowerCase().includes(searchLower) ||
-        (student.contact && student.contact.toLowerCase().includes(searchLower)) ||
-        (student.passportNumber && student.passportNumber.toLowerCase().includes(searchLower))
+        (student.contact &&
+          student.contact.toLowerCase().includes(searchLower)) ||
+        (student.passportNumber &&
+          student.passportNumber.toLowerCase().includes(searchLower))
       );
     });
   }, [students, searchQuery, statusFilter]);
@@ -2004,7 +2262,9 @@ export default function StudentsPage() {
     {
       icon: UserCheck,
       label: "In Process",
-      value: students.filter((s) => s.status === "in_process").length.toString(),
+      value: students
+        .filter((s) => s.status === "in_process")
+        .length.toString(),
       color: "bg-yellow-500",
     },
     {
@@ -2024,13 +2284,19 @@ export default function StudentsPage() {
   ];
 
   const StatsCard = ({ icon: Icon, title, value, color }: any) => (
-    <View className={`${currentTheme.card} rounded-lg p-4 ${currentTheme.border}`}>
+    <View
+      className={`${currentTheme.card} rounded-lg p-4 ${currentTheme.border}`}
+    >
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className={`text-2xl font-bold ${currentTheme.text}`}>{value}</Text>
+          <Text className={`text-2xl font-bold ${currentTheme.text}`}>
+            {value}
+          </Text>
           <Text className={`text-sm ${currentTheme.textMuted}`}>{title}</Text>
         </View>
-        <View className={`w-10 h-10 rounded-lg ${color} items-center justify-center`}>
+        <View
+          className={`w-10 h-10 rounded-lg ${color} items-center justify-center`}
+        >
           <Icon size={20} color="white" />
         </View>
       </View>
@@ -2062,8 +2328,8 @@ export default function StudentsPage() {
               toast.type === "success"
                 ? ["#10b981", "#059669"]
                 : toast.type === "error"
-                ? ["#ef4444", "#dc2626"]
-                : ["#3b82f6", "#2563eb"]
+                  ? ["#ef4444", "#dc2626"]
+                  : ["#3b82f6", "#2563eb"]
             }
             className="rounded-xl px-6 py-4 flex-row items-center justify-between shadow-2xl"
           >
@@ -2094,7 +2360,11 @@ export default function StudentsPage() {
               onPress={onRefresh}
               className="p-2.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
             >
-              <RefreshCw size={20} color={currentTheme.textMuted} className={refreshing ? "animate-spin" : ""} />
+              <RefreshCw
+                size={20}
+                color={currentTheme.textMuted}
+                className={refreshing ? "animate-spin" : ""}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -2146,7 +2416,8 @@ export default function StudentsPage() {
                 </View>
                 <View>
                   <Text className={`font-medium ${currentTheme.text}`}>
-                    {selectedStudents.length} student{selectedStudents.length !== 1 ? "s" : ""} selected
+                    {selectedStudents.length} student
+                    {selectedStudents.length !== 1 ? "s" : ""} selected
                   </Text>
                   <TouchableOpacity onPress={() => setSelectedStudents([])}>
                     <Text className="text-sm text-purple-600 dark:text-purple-400">
@@ -2192,7 +2463,9 @@ export default function StudentsPage() {
                   >
                     <Text
                       className={
-                        statusFilter === filter.value ? "text-white" : currentTheme.text
+                        statusFilter === filter.value
+                          ? "text-white"
+                          : currentTheme.text
                       }
                     >
                       {filter.label}

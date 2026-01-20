@@ -106,7 +106,7 @@ export default function BranchesPage() {
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | undefined>();
   const [selectedBranchForQR, setSelectedBranchForQR] = useState<Branch | null>(
-    null
+    null,
   );
   const [toast, setToast] = useState<{
     message: string;
@@ -136,11 +136,11 @@ export default function BranchesPage() {
         type === "success"
           ? Haptics.NotificationFeedbackType.Success
           : type === "error"
-          ? Haptics.NotificationFeedbackType.Error
-          : Haptics.NotificationFeedbackType.Warning
+            ? Haptics.NotificationFeedbackType.Error
+            : Haptics.NotificationFeedbackType.Warning,
       );
     },
-    []
+    [],
   );
 
   const fetchCurrentUser = async () => {
@@ -161,7 +161,7 @@ export default function BranchesPage() {
   const fetchOrganization = async (organizationId: string) => {
     try {
       const response = await fetch(
-        `${API_URL}/dashboard/organizations/${organizationId}`
+        `${API_URL}/dashboard/organizations/${organizationId}`,
       );
       const result = await response.json();
       if (result.success) {
@@ -253,7 +253,7 @@ export default function BranchesPage() {
           editingBranch
             ? "Branch updated successfully"
             : "Branch created successfully",
-          "success"
+          "success",
         );
         setIsModalOpen(false);
         setEditingBranch(undefined);
@@ -295,7 +295,7 @@ export default function BranchesPage() {
                 `${API_URL}/dashboard/branches/${branchId}`,
                 {
                   method: "DELETE",
-                }
+                },
               );
 
               const result = await response.json();
@@ -309,7 +309,7 @@ export default function BranchesPage() {
               } else {
                 showToast(
                   result.error || "Failed to deactivate branch",
-                  "error"
+                  "error",
                 );
               }
             } catch (error) {
@@ -318,13 +318,13 @@ export default function BranchesPage() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
   const handleToggleStatus = async (
     branchId: string,
-    currentStatus: string
+    currentStatus: string,
   ) => {
     const branch = branches.find((b) => b.id === branchId);
     if (!branch) return;
@@ -351,7 +351,7 @@ export default function BranchesPage() {
                   body: JSON.stringify({
                     status: newStatus,
                   }),
-                }
+                },
               );
 
               const result = await response.json();
@@ -362,7 +362,7 @@ export default function BranchesPage() {
               } else {
                 showToast(
                   result.error || `Failed to ${action} branch`,
-                  "error"
+                  "error",
                 );
               }
             } catch (error) {
@@ -371,7 +371,7 @@ export default function BranchesPage() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -443,7 +443,7 @@ export default function BranchesPage() {
     ) {
       showToast(
         `Organization branch limit reached. Maximum ${organization.maxBranches} branches allowed.`,
-        "error"
+        "error",
       );
       return;
     }
@@ -755,8 +755,8 @@ export default function BranchesPage() {
               toast.type === "success"
                 ? ["#10b981", "#059669"]
                 : toast.type === "error"
-                ? ["#ef4444", "#dc2626"]
-                : ["#3b82f6", "#2563eb"]
+                  ? ["#ef4444", "#dc2626"]
+                  : ["#3b82f6", "#2563eb"]
             }
             className="rounded-xl px-6 py-4 flex-row items-center justify-between shadow-2xl"
           >

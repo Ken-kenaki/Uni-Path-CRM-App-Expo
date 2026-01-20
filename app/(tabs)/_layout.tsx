@@ -1,66 +1,56 @@
-import { Tabs } from 'expo-router';
-import { BookOpen, Building2, CreditCard, FileText, Globe, GraduationCap, Home } from 'lucide-react-native';
+import { Tabs } from "expo-router";
+import {
+  BookOpen,
+  FileText,
+  Globe,
+  GraduationCap
+} from "lucide-react-native";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: '#111827',
-          borderTopColor: '#374151',
+          backgroundColor: "#111827",
+          borderTopColor: "#374151",
         },
-        tabBarActiveTintColor: '#8b5cf6',
-        tabBarInactiveTintColor: '#9ca3af',
+        tabBarActiveTintColor: "#8b5cf6",
+        tabBarInactiveTintColor: "#9ca3af",
         headerShown: false,
       }}
     >
       <Tabs.Screen
-        name="index"  // This will be app/(tabs)/index.tsx
+        name="dashboard" // This will be app/(tabs)/dashboard.tsx
         options={{
-          title: 'Home',
-          tabBarIcon: ({ size, color }) => <Home size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="countries"  // This will be app/(tabs)/countries.tsx
-        options={{
-          title: 'Countries',
+          title: "Dashboard",
           tabBarIcon: ({ size, color }) => <Globe size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="universities"  // This will be app/(tabs)/universities.tsx
+        name="applicants" // This will be app/(tabs)/applicants.tsx
         options={{
-          title: 'Universities',
-          tabBarIcon: ({ size, color }) => <GraduationCap size={size} color={color} />,
+          title: "Applicants",
+          tabBarIcon: ({ size, color }) => (
+            <GraduationCap size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="courses"  // This will be app/(tabs)/courses.tsx
+        name="email" // This will be app/(tabs)/email.tsx
         options={{
-          title: 'Courses',
-          tabBarIcon: ({ size, color }) => <BookOpen size={size} color={color} />,
+          title: "Email",
+          tabBarIcon: ({ size, color }) => (
+            <BookOpen size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="documents"  // This will be app/(tabs)/documents.tsx
+        name="profile" // This will be app/(tabs)/profile.tsx
         options={{
-          title: 'Documents',
-          tabBarIcon: ({ size, color }) => <FileText size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="payments"  // This will be app/(tabs)/payments.tsx
-        options={{
-          title: 'Payments',
-          tabBarIcon: ({ size, color }) => <CreditCard size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="branches"  // This will be app/(tabs)/branches.tsx
-        options={{
-          title: 'Branches',
-          tabBarIcon: ({ size, color }) => <Building2 size={size} color={color} />,
+          title: "Profile",
+          tabBarIcon: ({ size, color }) => (
+            <FileText size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

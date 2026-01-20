@@ -1,8 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import { ChevronLeft, Eye, EyeOff } from 'lucide-react-native';
-import React, { useState } from 'react';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { ChevronLeft, Eye, EyeOff } from "lucide-react-native";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -11,34 +11,37 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
-} from 'react-native';
+  View,
+} from "react-native";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
         },
-        body: JSON.stringify({ email, password }),
-      });
+      );
 
       const data = await response.json();
 
-      console.log('Login API Response:', data); // Debug log
+      console.log("Login API Response:", data); // Debug log
 
       if (!response.ok) {
         throw new Error(data.error || `Login failed: ${response.status}`);
@@ -46,70 +49,72 @@ export default function LoginScreen() {
 
       // Check if login was successful
       if (!data.success) {
-        throw new Error(data.error || 'Login failed');
+        throw new Error(data.error || "Login failed");
       }
 
       // Store user data in AsyncStorage
       if (data.data && data.data.profile) {
-        await AsyncStorage.setItem('user', JSON.stringify(data.data));
-        console.log('User data stored:', data.data.profile.email);
+        await AsyncStorage.setItem("user", JSON.stringify(data.data));
+        console.log("User data stored:", data.data.profile.email);
       }
 
       // ⚠️ CRITICAL FIX: The role is in data.data.profile, not data.user
       // Your API returns: data.data.profile.role, not data.user.role
-      
+
       // Get the user role from the profile data
       const userRole = data.data?.profile?.role;
-      
+
       if (!userRole) {
-        console.error('No role found in response:', data);
-        throw new Error('User role not found in response');
+        console.error("No role found in response:", data);
+        throw new Error("User role not found in response");
       }
 
-      console.log('Login successful, user role:', userRole);
+      console.log("Login successful, user role:", userRole);
 
       // Redirect based on user role
-      if (userRole === 'admin') {
-        router.replace('/(tabs)/analytics');
-      } else if (userRole === 'owner') {
-        router.replace('/(tabs)/organizations');
-      } else if (userRole === 'staff' || userRole === 'user') {
-        router.replace('/(tabs)/dashboard');
+      if (userRole === "admin") {
+        router.replace("/(tabs)/dashboard");
+      } else if (userRole === "owner") {
+        router.replace("/(tabs)/dashboard");
+      } else if (userRole === "staff" || userRole === "user") {
+        router.replace("/(tabs)/dashboard");
       } else {
-        console.warn('Unknown role:', userRole);
+        console.warn("Unknown role:", userRole);
         // Default to dashboard for unknown roles
-        router.replace('/(tabs)/dashboard');
+        router.replace("/(tabs)/dashboard");
+      }
+    } catch (err: any) {
+      console.error("Login error details:", err);
+      console.error("Full error object:", JSON.stringify(err, null, 2));
+
+      let errorMessage = err.message || "An unexpected error occurred";
+
+      if (err.message.includes("Invalid email or password")) {
+        errorMessage = "Invalid email or password";
+      } else if (err.message.includes("Account not activated")) {
+        errorMessage = "Your account is not activated. Please contact support.";
+      } else if (err.message.includes("Organization disabled")) {
+        errorMessage = "Your organization account has been disabled.";
+      } else if (err.message.includes("User profile not found")) {
+        errorMessage = "User profile not found. Please contact support.";
+      } else if (
+        err.message.includes("fetch failed") ||
+        err.message.includes("network")
+      ) {
+        errorMessage = "Network error. Please check your connection.";
       }
 
-    } catch (err: any) {
-      console.error('Login error details:', err);
-      console.error('Full error object:', JSON.stringify(err, null, 2));
-      
-      let errorMessage = err.message || 'An unexpected error occurred';
-      
-      if (err.message.includes('Invalid email or password')) {
-        errorMessage = 'Invalid email or password';
-      } else if (err.message.includes('Account not activated')) {
-        errorMessage = 'Your account is not activated. Please contact support.';
-      } else if (err.message.includes('Organization disabled')) {
-        errorMessage = 'Your organization account has been disabled.';
-      } else if (err.message.includes('User profile not found')) {
-        errorMessage = 'User profile not found. Please contact support.';
-      } else if (err.message.includes('fetch failed') || err.message.includes('network')) {
-        errorMessage = 'Network error. Please check your connection.';
-      }
-      
       setError(errorMessage);
-      Alert.alert('Login Failed', errorMessage);
+      Alert.alert("Login Failed", errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-black">
+    <SafeAreaView className="flex-1 gap-2 bg-black">
       <LinearGradient
-        colors={['#1e1b4b', '#0f172a', '#581c87']}
+        colors={["#1e1b4b", "#0f172a", "#581c87"]}
         className="flex-1"
       >
         <ScrollView className="flex-1">
@@ -123,7 +128,9 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             <View className="mb-10">
-              <Text className="text-4xl font-bold text-white mb-2">Welcome Back</Text>
+              <Text className="text-4xl font-bold text-white mb-2">
+                Welcome Back
+              </Text>
               <Text className="text-gray-400 text-base">
                 Sign in to continue to your account
               </Text>
@@ -139,13 +146,15 @@ export default function LoginScreen() {
             <View className="space-y-6">
               {/* Email Input */}
               <View>
-                <Text className="text-gray-300 text-sm mb-2">Email Address</Text>
+                <Text className="text-gray-300 text-sm mb-2">
+                  Email Address
+                </Text>
                 <TextInput
                   placeholder="you@example.com"
                   placeholderTextColor="#6b7280"
                   value={email}
                   onChangeText={setEmail}
-                  className="bg-white/5 border border-cyan-500/30 rounded-xl px-4 py-4 text-white"
+                  className="bg-white/5 border border-cyan-500/30 rounded-xl px-4 py-4 my-2 text-white"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   editable={!isLoading}
@@ -162,12 +171,12 @@ export default function LoginScreen() {
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
-                    className="bg-white/5 border border-cyan-500/30 rounded-xl px-4 py-4 text-white pr-12"
+                    className="bg-white/5 border border-cyan-500/30 rounded-xl px-4 py-4 my-2 text-white pr-12"
                     editable={!isLoading}
                   />
                   <TouchableOpacity
                     onPress={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-4"
+                    className="absolute right-3 top-6"
                   >
                     {showPassword ? (
                       <EyeOff size={20} color="#9ca3af" />
@@ -179,22 +188,22 @@ export default function LoginScreen() {
               </View>
 
               {/* Remember & Forgot */}
-              <View className="flex-row justify-between items-center">
+              <View className="flex-row justify-between items-center my-2">
                 <TouchableOpacity
                   onPress={() => setRemember(!remember)}
                   className="flex-row items-center"
                   disabled={isLoading}
                 >
-                  <View className={`w-5 h-5 rounded border-2 ${remember ? 'bg-cyan-500 border-cyan-500' : 'border-gray-500'} mr-2 items-center justify-center`}>
-                    {remember && (
-                      <Text className="text-white text-xs">✓</Text>
-                    )}
+                  <View
+                    className={`w-5 h-5 rounded border-2 ${remember ? "bg-cyan-500 border-cyan-500" : "border-gray-500"} mr-2 items-center justify-center`}
+                  >
+                    {remember && <Text className="text-white text-xs">✓</Text>}
                   </View>
                   <Text className="text-gray-400">Remember me</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => router.push('/forgot-password')}
+                  onPress={() => router.push("/forgot-password")}
                   disabled={isLoading}
                 >
                   <Text className="text-cyan-400">Forgot Password?</Text>
@@ -205,34 +214,16 @@ export default function LoginScreen() {
               <TouchableOpacity
                 onPress={handleSubmit}
                 disabled={isLoading}
-                className={`bg-purple-600 rounded-xl py-4 items-center ${isLoading ? 'opacity-70' : ''}`}
+                className={`bg-purple-600 rounded-xl py-4 items-center ${isLoading ? "opacity-70" : ""}`}
               >
                 {isLoading ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <Text className="text-white font-semibold text-base">Continue</Text>
+                  <Text className="text-white font-semibold text-base">
+                    Continue
+                  </Text>
                 )}
               </TouchableOpacity>
-
-              {/* Divider */}
-              <View className="flex-row items-center my-6">
-                <View className="flex-1 h-px bg-gray-800" />
-                <Text className="text-gray-500 mx-4">OR</Text>
-                <View className="flex-1 h-px bg-gray-800" />
-              </View>
-
-              {/* Sign Up Link */}
-              <View className="items-center">
-                <Text className="text-gray-400">
-                  Don't have an account?{' '}
-                  <Text
-                    className="text-cyan-400 font-semibold"
-                    onPress={() => router.push('/register')}
-                  >
-                    Sign up now
-                  </Text>
-                </Text>
-              </View>
             </View>
           </View>
         </ScrollView>
