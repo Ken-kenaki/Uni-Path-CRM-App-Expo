@@ -1,6 +1,5 @@
 // app/(tabs)/analytics.tsx
 import { API_URL } from "@/config";
-import { Theme, themeConfigs } from "@/theme";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -8,12 +7,11 @@ import {
   BarChart3,
   Calendar,
   CheckCircle,
-  Download,
   Eye,
   FileCheck,
-  Filter,
   RefreshCw,
   Search,
+  Target,
   TrendingDown,
   TrendingUp,
   Users,
@@ -33,7 +31,6 @@ import {
 import * as Progress from "react-native-progress";
 import Animated, {
   FadeIn,
-  FadeOut,
   Layout,
   SlideInDown,
   SlideOutDown,
@@ -184,6 +181,15 @@ const MONTHS = [
   "Dec",
 ];
 
+// Black theme configuration
+const blackTheme = {
+  background: "bg-black",
+  card: "bg-gray-900",
+  border: "border-gray-800",
+  text: "text-white",
+  textMuted: "text-gray-400",
+};
+
 export default function AnalyticsPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null,
@@ -191,7 +197,6 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [theme, setTheme] = useState<Theme>("dark");
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error" | "info";
@@ -207,7 +212,6 @@ export default function AnalyticsPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const router = useRouter();
-  const currentTheme = themeConfigs[theme];
 
   const showToast = useCallback(
     (message: string, type: "success" | "error" | "info") => {
@@ -519,7 +523,7 @@ export default function AnalyticsPage() {
     return (
       <Animated.View
         layout={Layout.duration(300)}
-        className={`p-4 rounded-2xl ${currentTheme.card} border ${currentTheme.border}`}
+        className={`p-4 rounded-2xl ${blackTheme.card} border ${blackTheme.border}`}
       >
         <View className="flex-row justify-between items-start mb-3">
           <View className={`p-2.5 rounded-xl ${bgColor}`}>
@@ -543,11 +547,11 @@ export default function AnalyticsPage() {
           )}
         </View>
 
-        <Text className={`text-2xl font-black ${currentTheme.text} mb-1`}>
+        <Text className={`text-2xl font-black ${blackTheme.text} mb-1`}>
           {formattedValue}
           {suffix}
         </Text>
-        <Text className={`text-sm ${currentTheme.textMuted}`}>{title}</Text>
+        <Text className={`text-sm ${blackTheme.textMuted}`}>{title}</Text>
       </Animated.View>
     );
   };
@@ -562,18 +566,16 @@ export default function AnalyticsPage() {
     onAction?: () => void;
   }) => (
     <View
-      className={`rounded-2xl p-4 ${currentTheme.card} border ${currentTheme.border} mb-4`}
+      className={`rounded-2xl p-4 ${blackTheme.card} border ${blackTheme.border} mb-4`}
     >
       <View className="flex-row justify-between items-center mb-4">
-        <Text className={`text-lg font-bold ${currentTheme.text}`}>
-          {title}
-        </Text>
+        <Text className={`text-lg font-bold ${blackTheme.text}`}>{title}</Text>
         {onAction && (
           <TouchableOpacity
             onPress={onAction}
-            className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-800"
+            className="p-1.5 rounded-lg bg-gray-800"
           >
-            <Eye size={16} color={currentTheme.textMuted} />
+            <Eye size={16} color={blackTheme.textMuted} />
           </TouchableOpacity>
         )}
       </View>
@@ -592,10 +594,10 @@ export default function AnalyticsPage() {
             return (
               <View key={index} className="space-y-1">
                 <View className="flex-row justify-between items-center">
-                  <Text className={`text-sm ${currentTheme.text}`}>
+                  <Text className={`text-sm ${blackTheme.text}`}>
                     {item.country}
                   </Text>
-                  <Text className={`font-medium ${currentTheme.text}`}>
+                  <Text className={`font-medium ${blackTheme.text}`}>
                     {item.count}
                   </Text>
                 </View>
@@ -603,7 +605,7 @@ export default function AnalyticsPage() {
                   progress={percentage / 100}
                   width={width - 80}
                   color="#3b82f6"
-                  unfilledColor={currentTheme.card}
+                  unfilledColor={blackTheme.card}
                   borderWidth={0}
                   height={6}
                   borderRadius={3}
@@ -656,14 +658,14 @@ export default function AnalyticsPage() {
           <View key={index} className="w-1/2 px-1 mb-3">
             <View className={`p-3 rounded-xl ${metric.bgColor}`}>
               <View className="flex-row items-center mb-2">
-                <View className="p-1.5 rounded-lg bg-white/50 dark:bg-black/20 mr-2">
+                <View className="p-1.5 rounded-lg bg-black/20 mr-2">
                   <metric.icon size={14} color={metric.color} />
                 </View>
-                <Text className={`text-xs font-medium ${currentTheme.text}`}>
+                <Text className={`text-xs font-medium ${blackTheme.text}`}>
                   {metric.label}
                 </Text>
               </View>
-              <Text className={`text-xl font-black ${currentTheme.text}`}>
+              <Text className={`text-xl font-black ${blackTheme.text}`}>
                 {metric.value}
                 {metric.suffix}
               </Text>
@@ -716,12 +718,12 @@ export default function AnalyticsPage() {
             return (
               <TouchableOpacity
                 key={index}
-                className="flex-row items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50"
+                className="flex-row items-center justify-between p-3 rounded-xl bg-gray-800/50"
                 onPress={() => {
                   if (activity.type === "student") {
-                    router.push(`/(tabs)/students/${activity.id}`);
+                    router.push(`/(applicants)/students`);
                   } else {
-                    router.push(`/(tabs)/visa/${activity.id}`);
+                    router.push(`/(applicants)/students`);
                   }
                 }}
               >
@@ -738,12 +740,12 @@ export default function AnalyticsPage() {
                   </View>
                   <View className="flex-1">
                     <Text
-                      className={`font-medium ${currentTheme.text}`}
+                      className={`font-medium ${blackTheme.text}`}
                       numberOfLines={1}
                     >
                       {activity.name}
                     </Text>
-                    <Text className={`text-xs ${currentTheme.textMuted}`}>
+                    <Text className={`text-xs ${blackTheme.textMuted}`}>
                       {activity.type === "student"
                         ? "New Student"
                         : "Visa Application"}
@@ -761,7 +763,7 @@ export default function AnalyticsPage() {
                   >
                     {statusText}
                   </Text>
-                  <Text className={`text-xs ${currentTheme.textMuted} mt-1`}>
+                  <Text className={`text-xs ${blackTheme.textMuted} mt-1`}>
                     {new Date(activity.date).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
@@ -781,46 +783,32 @@ export default function AnalyticsPage() {
       <View className="flex-row flex-wrap -mx-1">
         {[
           {
-            label: "Add Student",
+            label: "View Student",
             icon: Users,
             color: "#8b5cf6",
             bgColor: "bg-purple-500/10",
-            action: () => router.push("/(applicants)/students?action=create"),
-          },
-          {
-            label: "View Students",
-            icon: BarChart3,
-            color: "#10b981",
-            bgColor: "bg-green-500/10",
             action: () => router.push("/(applicants)/students"),
           },
           {
-            label: "Visitors",
-            icon: BarChart3,
-            color: "#10b981",
-            bgColor: "bg-green-500/10",
-            action: () => router.push("/(applicants)/visitor"),
-          },
-          {
-            label: "Leads",
+            label: "View Leads",
             icon: BarChart3,
             color: "#10b981",
             bgColor: "bg-green-500/10",
             action: () => router.push("/(applicants)/leads"),
           },
           {
-            label: "Branches",
-            icon: BarChart3,
+            label: "View Visitors",
+            icon: Target,
             color: "#10b981",
             bgColor: "bg-green-500/10",
-            action: () => router.push("/(applicants)/branches"),
+            action: () => router.push("/(applicants)/visitors"),
           },
           {
-            label: "Export Data",
-            icon: Download,
-            color: "#f59e0b",
-            bgColor: "bg-yellow-500/10",
-            action: () => showToast("Export feature coming soon", "info"),
+            label: "Branches",
+            icon: Calendar,
+            color: "#8b5cf6",
+            bgColor: "bg-purple-500/10",
+            action: () => router.push("/(tabs)/branches"),
           },
         ].map((action, index) => (
           <TouchableOpacity
@@ -829,11 +817,11 @@ export default function AnalyticsPage() {
             onPress={action.action}
           >
             <View className={`p-4 rounded-xl ${action.bgColor} items-center`}>
-              <View className="p-2.5 rounded-lg bg-white/50 dark:bg-black/20 mb-2">
+              <View className="p-2.5 rounded-lg bg-black/20 mb-2">
                 <action.icon size={20} color={action.color} />
               </View>
               <Text
-                className={`text-sm font-medium ${currentTheme.text} text-center`}
+                className={`text-sm font-medium ${blackTheme.text} text-center`}
               >
                 {action.label}
               </Text>
@@ -844,92 +832,10 @@ export default function AnalyticsPage() {
     </ChartCard>
   );
 
-  const FilterPanel = () => (
-    <Animated.View
-      entering={FadeIn.duration(300)}
-      exiting={FadeOut.duration(200)}
-      className="mb-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50"
-    >
-      <View className="flex-row justify-between items-center mb-3">
-        <Text className={`font-bold ${currentTheme.text}`}>Filters</Text>
-        <TouchableOpacity onPress={() => setShowFilters(false)}>
-          <X size={20} color={currentTheme.textMuted} />
-        </TouchableOpacity>
-      </View>
-
-      <View className="space-y-3">
-        <View>
-          <Text
-            className={`text-sm font-medium mb-2 ${currentTheme.textMuted}`}
-          >
-            Time Range
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="flex-row gap-2"
-          >
-            {["Today", "7D", "30D", "90D", "1Y", "All"].map((range) => (
-              <TouchableOpacity
-                key={range}
-                className={`px-3 py-2 rounded-lg ${timeRange === range.toLowerCase() ? "bg-purple-100 dark:bg-purple-600" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"}`}
-              >
-                <Text
-                  className={
-                    timeRange === range.toLowerCase()
-                      ? "text-purple-700 dark:text-white font-medium"
-                      : currentTheme.text
-                  }
-                >
-                  {range}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        <View>
-          <Text
-            className={`text-sm font-medium mb-2 ${currentTheme.textMuted}`}
-          >
-            Category
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="flex-row gap-2"
-          >
-            {["All", "Students", "Leads", "Visitors", "Visas", "Payments"].map(
-              (category) => (
-                <TouchableOpacity
-                  key={category}
-                  className={`px-3 py-2 rounded-lg ${selectedCategory === category.toLowerCase() ? "bg-blue-100 dark:bg-blue-600" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"}`}
-                  onPress={() => setSelectedCategory(category.toLowerCase())}
-                >
-                  <Text
-                    className={
-                      selectedCategory === category.toLowerCase()
-                        ? "text-blue-700 dark:text-white font-medium"
-                        : currentTheme.text
-                    }
-                  >
-                    {category}
-                  </Text>
-                </TouchableOpacity>
-              ),
-            )}
-          </ScrollView>
-        </View>
-      </View>
-    </Animated.View>
-  );
-
   if (loading && !dashboardData) {
     return (
-      <SafeAreaView className={`flex-1 ${currentTheme.background}`}>
-        <StatusBar
-          barStyle={theme === "dark" ? "light-content" : "dark-content"}
-        />
+      <SafeAreaView className={`flex-1 ${blackTheme.background}`}>
+        <StatusBar barStyle="light-content" />
         <View className="flex-1 items-center justify-center">
           <Animated.View
             entering={ZoomIn.duration(1000)}
@@ -939,11 +845,11 @@ export default function AnalyticsPage() {
           </Animated.View>
           <Animated.Text
             entering={FadeIn.delay(200)}
-            className={`text-lg font-semibold mt-6 ${currentTheme.text}`}
+            className={`text-lg font-semibold mt-6 ${blackTheme.text}`}
           >
             Loading Analytics...
           </Animated.Text>
-          <Text className={`${currentTheme.textMuted} mt-2 text-center px-8`}>
+          <Text className={`${blackTheme.textMuted} mt-2 text-center px-8`}>
             Crunching the numbers for you
           </Text>
         </View>
@@ -953,19 +859,17 @@ export default function AnalyticsPage() {
 
   if (error) {
     return (
-      <SafeAreaView className={`flex-1 ${currentTheme.background}`}>
-        <StatusBar
-          barStyle={theme === "dark" ? "light-content" : "dark-content"}
-        />
+      <SafeAreaView className={`flex-1 ${blackTheme.background}`}>
+        <StatusBar barStyle="light-content" />
         <View className="flex-1 items-center justify-center p-8">
-          <View className="w-24 h-24 rounded-3xl bg-gradient-to-br from-red-100 to-red-200 dark:from-red-500/20 dark:to-red-600/20 items-center justify-center mb-6">
+          <View className="w-24 h-24 rounded-3xl bg-gradient-to-br from-red-500/20 to-red-600/20 items-center justify-center mb-6">
             <X size={40} color="#ef4444" />
           </View>
-          <Text className={`text-2xl font-bold mb-2 ${currentTheme.text}`}>
+          <Text className={`text-2xl font-bold mb-2 ${blackTheme.text}`}>
             Failed to Load
           </Text>
           <Text
-            className={`${currentTheme.textMuted} text-center text-base mb-8`}
+            className={`${blackTheme.textMuted} text-center text-base mb-8`}
           >
             {error}
           </Text>
@@ -982,10 +886,8 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <SafeAreaView className={`flex-1 ${currentTheme.background}`}>
-      <StatusBar
-        barStyle={theme === "dark" ? "light-content" : "dark-content"}
-      />
+    <SafeAreaView className={`flex-1 ${blackTheme.background}`}>
+      <StatusBar barStyle="light-content" />
 
       {/* Toast Notification */}
       {toast && (
@@ -1023,30 +925,14 @@ export default function AnalyticsPage() {
       <View className="px-5 pt-4 pb-3">
         <View className="flex-row justify-between items-center mb-4">
           <View className="flex-1">
-            <Text className={`text-3xl font-black ${currentTheme.text} mb-1`}>
+            <Text className={`text-3xl font-black ${blackTheme.text} mb-1`}>
               Analytics
             </Text>
-            <Text className={`text-sm ${currentTheme.textMuted}`}>
+            <Text className={`text-sm ${blackTheme.textMuted}`}>
               {dashboardData?.user?.name
                 ? `Welcome, ${dashboardData.user.name}`
                 : "Real-time insights & metrics"}
             </Text>
-          </View>
-
-          <View className="flex-row gap-3">
-            <TouchableOpacity
-              onPress={() => setShowFilters(!showFilters)}
-              className={`p-3 rounded-xl ${currentTheme.card} border ${currentTheme.border}`}
-            >
-              <Filter size={20} color={currentTheme.text} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={onRefresh}
-              className={`p-3 rounded-xl ${currentTheme.card} border ${currentTheme.border}`}
-            >
-              <RefreshCw size={20} color={currentTheme.text} />
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -1055,54 +941,29 @@ export default function AnalyticsPage() {
           horizontal
           showsHorizontalScrollIndicator={false}
           className="mb-4"
-        >
-          <View className="flex-row gap-2">
-            {[
-              { id: "overview", label: "Overview" },
-              { id: "students", label: "Students" },
-              { id: "visas", label: "Visas" },
-              { id: "financial", label: "Financial" },
-              { id: "performance", label: "Performance" },
-            ].map((tab) => (
-              <TouchableOpacity
-                key={tab.id}
-                onPress={() => setActiveTab(tab.id as any)}
-                className={`flex-row items-center px-4 py-3 rounded-xl ${activeTab === tab.id ? "bg-purple-600" : currentTheme.card} border ${currentTheme.border}`}
-              >
-                <Text
-                  className={`font-medium ${activeTab === tab.id ? "text-white" : currentTheme.text}`}
-                >
-                  {tab.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
+        ></ScrollView>
 
         {/* Search */}
         <View className="relative mb-3">
           <View className="absolute left-4 top-0 bottom-0 justify-center z-10">
-            <Search size={20} color={currentTheme.textMuted} />
+            <Search size={20} color={blackTheme.textMuted} />
           </View>
           <TextInput
             placeholder="Search analytics"
-            placeholderTextColor={currentTheme.textMuted}
+            placeholderTextColor={blackTheme.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
-            className={`pl-12 pr-4 py-3.5 ${currentTheme.card} placeholder:text-white rounded-2xl border ${currentTheme.border} ${currentTheme.text} text-base font-medium`}
+            className={`pl-12 pr-4 py-3.5 ${blackTheme.card} placeholder:text-white rounded-2xl border ${blackTheme.border} ${blackTheme.text} text-base font-medium`}
           />
           {searchQuery ? (
             <TouchableOpacity
               onPress={() => setSearchQuery("")}
               className="absolute right-4 top-0 bottom-0 justify-center"
             >
-              <X size={20} color={currentTheme.textMuted} />
+              <X size={20} color={blackTheme.textMuted} />
             </TouchableOpacity>
           ) : null}
         </View>
-
-        {/* Filters */}
-        {showFilters && <FilterPanel />}
       </View>
 
       <ScrollView
@@ -1142,10 +1003,10 @@ export default function AnalyticsPage() {
           </View>
         </View>
 
+        <PerformanceMetrics />
         <QuickActions />
         {/* Performance & Recent Activity */}
-        <PerformanceMetrics />
-        <RecentActivity />
+        {/* <RecentActivity /> */}
       </ScrollView>
     </SafeAreaView>
   );

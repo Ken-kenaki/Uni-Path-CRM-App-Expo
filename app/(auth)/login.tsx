@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { ChevronLeft, Eye, EyeOff } from "lucide-react-native";
+import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -119,14 +119,7 @@ export default function LoginScreen() {
       >
         <ScrollView className="flex-1">
           {/* Header */}
-          <View className="px-6 pt-12 pb-8">
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="w-10 h-10 rounded-full bg-white/10 items-center justify-center mb-8"
-            >
-              <ChevronLeft size={24} color="white" />
-            </TouchableOpacity>
-
+          <View className="px-6 pt-20 pb-8">
             <View className="mb-10">
               <Text className="text-4xl font-bold text-white mb-2">
                 Welcome Back

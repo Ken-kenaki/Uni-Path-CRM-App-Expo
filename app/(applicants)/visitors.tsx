@@ -1,16 +1,14 @@
-// app/(tabs)/leads.tsx
+// app/(tabs)/visitors.tsx
 import { API_URL } from "@/config";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Calendar,
-  Check,
   Mail,
   Phone,
   PhoneCall,
   Plus,
   Search,
   TrendingUp,
-  UserCheck,
   Users,
   X,
 } from "lucide-react-native";
@@ -20,6 +18,7 @@ import {
   Alert,
   Dimensions,
   FlatList,
+  Image,
   Linking,
   Modal,
   RefreshControl,
@@ -65,28 +64,34 @@ const getIconSize = (baseSize: number) => {
 };
 
 // ============ TYPES ============
-interface Lead {
+interface Visitor {
   id: string;
   $id: string;
   firstName: string;
   lastName: string;
   email: string;
   contact: string;
-  leadStatus: "new" | "contacted" | "qualified" | "converted" | "lost";
+  gender?: string;
+  dateOfBirth?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  nationality?: string;
+  interestArea?: string;
+  referralSource?: string;
+  visitorType?: string;
+  followUpPriority?: string;
+  conversionPotential?: string;
   $createdAt: string;
-  interestedArea?: string;
-  countries?: string;
-  budgetRange?: string;
-  followUpPriority?: "low" | "medium" | "high" | "urgent";
-  priorityScore?: number;
-  isConverted?: boolean;
-  canConvert?: boolean;
+  totalVisits?: number;
+  avatar?: string;
 }
 
 // ============ CACHE MANAGER ============
 class CacheManager {
   private cache = new Map<string, any>();
-  private defaultTTL = 5 * 60 * 1000;
+  private defaultTTL = 5 * 60 * 1000; // 5 minutes
 
   set<T>(key: string, data: T, ttl?: number): void {
     const now = Date.now();
@@ -122,34 +127,6 @@ const cacheManager = new CacheManager();
 
 // ============ COMPONENTS ============
 
-// Status Badge Component
-const StatusBadge = ({ status }: { status: string }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "new":
-        return "bg-blue-500/20 text-blue-400";
-      case "contacted":
-        return "bg-yellow-500/20 text-yellow-400";
-      case "qualified":
-        return "bg-green-500/20 text-green-400";
-      case "converted":
-        return "bg-purple-500/20 text-purple-400";
-      case "lost":
-        return "bg-red-500/20 text-red-400";
-      default:
-        return "bg-gray-500/20 text-gray-400";
-    }
-  };
-
-  return (
-    <View className={`px-2 py-1 rounded-full ${getStatusColor(status)}`}>
-      <Text className="text-xs font-medium capitalize">
-        {status.replace("_", " ")}
-      </Text>
-    </View>
-  );
-};
-
 // Priority Badge Component
 const PriorityBadge = ({ priority }: { priority: string }) => {
   const getPriorityColor = (priority: string) => {
@@ -169,13 +146,45 @@ const PriorityBadge = ({ priority }: { priority: string }) => {
 
   return (
     <View className={`px-2 py-1 rounded-full ${getPriorityColor(priority)}`}>
-      <Text className="text-xs font-medium capitalize">{priority}</Text>
+      <Text className="text-xs font-medium capitalize">
+        {priority.charAt(0).toUpperCase() + priority.slice(1)}
+      </Text>
     </View>
   );
 };
 
-// Lead Card Component
-const LeadCard = ({ lead, onPress }: { lead: Lead; onPress: () => void }) => {
+// Potential Badge Component
+const PotentialBadge = ({ potential }: { potential: string }) => {
+  const getPotentialColor = (potential: string) => {
+    switch (potential) {
+      case "high":
+        return "bg-green-500/20 text-green-400";
+      case "medium":
+        return "bg-yellow-500/20 text-yellow-400";
+      case "low":
+        return "bg-gray-500/20 text-gray-400";
+      default:
+        return "bg-gray-500/20 text-gray-400";
+    }
+  };
+
+  return (
+    <View className={`px-2 py-1 rounded-full ${getPotentialColor(potential)}`}>
+      <Text className="text-xs font-medium capitalize">
+        {potential} potential
+      </Text>
+    </View>
+  );
+};
+
+// Visitor Card Component
+const VisitorCard = ({
+  visitor,
+  onPress,
+}: {
+  visitor: Visitor;
+  onPress: () => void;
+}) => {
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
   };
@@ -202,17 +211,17 @@ const LeadCard = ({ lead, onPress }: { lead: Lead; onPress: () => void }) => {
             style={{ fontSize }}
             numberOfLines={1}
           >
-            {lead.firstName} {lead.lastName}
+            {visitor.firstName} {visitor.lastName}
           </Text>
           <Text
             className="text-gray-400 text-sm truncate"
             style={{ fontSize: fontSize - 2 }}
             numberOfLines={1}
           >
-            {lead.email || "No email"}
+            {visitor.email || "No email"}
           </Text>
         </View>
-        <StatusBadge status={lead.leadStatus} />
+        <PotentialBadge potential={visitor.conversionPotential || "low"} />
       </View>
 
       <View className="space-y-2 mb-3">
@@ -223,33 +232,33 @@ const LeadCard = ({ lead, onPress }: { lead: Lead; onPress: () => void }) => {
             style={{ fontSize: fontSize - 2 }}
             numberOfLines={1}
           >
-            {lead.contact || "N/A"}
+            {visitor.contact || "N/A"}
           </Text>
         </View>
 
-        {lead.interestedArea && (
+        {visitor.interestArea && (
           <View className="flex-row items-center">
             <Text
               className="text-gray-400 flex-1 truncate"
               style={{ fontSize: fontSize - 2 }}
               numberOfLines={1}
             >
-              {lead.interestedArea}
+              {visitor.interestArea}
             </Text>
           </View>
         )}
       </View>
 
       <View className="flex-row justify-between items-center mb-2">
-        <PriorityBadge priority={lead.followUpPriority || "medium"} />
-        {lead.priorityScore && (
+        <PriorityBadge priority={visitor.followUpPriority || "medium"} />
+        {visitor.totalVisits && (
           <View className="flex-row items-center">
             <TrendingUp size={iconSize - 2} color="#9ca3af" />
             <Text
               className="text-gray-400 ml-1"
               style={{ fontSize: fontSize - 2 }}
             >
-              {lead.priorityScore}
+              {visitor.totalVisits} visits
             </Text>
           </View>
         )}
@@ -262,48 +271,42 @@ const LeadCard = ({ lead, onPress }: { lead: Lead; onPress: () => void }) => {
             className="text-gray-400 ml-1"
             style={{ fontSize: fontSize - 2 }}
           >
-            {new Date(lead.$createdAt).toLocaleDateString("en-US", {
+            {new Date(visitor.$createdAt).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
             })}
           </Text>
         </View>
 
-        {lead.canConvert && !lead.isConverted && (
-          <View className="flex-row items-center">
-            <UserCheck size={iconSize - 2} color="#10b981" />
-          </View>
-        )}
+        <View className="flex-row items-center">
+          <Users size={iconSize - 2} color="#3b82f6" />
+        </View>
       </View>
     </TouchableOpacity>
   );
 };
 
-// Lead Detail Modal Component
-const LeadDetailModal = ({
-  lead,
+// Visitor Detail Modal Component
+const VisitorDetailModal = ({
+  visitor,
   isOpen,
   onClose,
-  onConvert,
 }: {
-  lead: Lead | null;
+  visitor: Visitor | null;
   isOpen: boolean;
   onClose: () => void;
-  onConvert: (leadId: string) => void;
 }) => {
-  const [activeTab, setActiveTab] = useState<"overview" | "details">(
-    "overview",
-  );
+  const [activeTab, setActiveTab] = useState<"overview" | "source">("overview");
 
-  if (!lead) return null;
+  if (!visitor) return null;
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
   };
 
   const handleCallPress = () => {
-    if (lead.contact) {
-      const phoneNumber = lead.contact.replace(/\D/g, "");
+    if (visitor.contact) {
+      const phoneNumber = visitor.contact.replace(/\D/g, "");
       const url = `tel:${phoneNumber}`;
       Linking.openURL(url).catch((err) => {
         Alert.alert("Error", "Could not make the call");
@@ -313,8 +316,8 @@ const LeadDetailModal = ({
   };
 
   const handleEmailPress = () => {
-    if (lead.email) {
-      const url = `mailto:${lead.email}`;
+    if (visitor.email) {
+      const url = `mailto:${visitor.email}`;
       Linking.openURL(url).catch((err) => {
         Alert.alert("Error", "Could not open email app");
         console.error("Error opening email app:", err);
@@ -346,7 +349,7 @@ const LeadDetailModal = ({
           className="bg-gray-900 rounded-t-3xl absolute bottom-0 left-0 right-0"
           style={{
             padding: modalPadding,
-            maxHeight: height * 0.9, // Changed from 0.85 to 0.9
+            maxHeight: height * 0.9,
           }}
         >
           {/* Close button at top */}
@@ -360,9 +363,11 @@ const LeadDetailModal = ({
           </View>
 
           <View className="mb-4">
-            <Text className="text-xl font-bold text-white">Lead Details</Text>
+            <Text className="text-xl font-bold text-white">
+              Visitor Details
+            </Text>
             <Text className="text-sm text-gray-400 mt-1">
-              View lead information
+              View visitor information
             </Text>
           </View>
 
@@ -370,36 +375,51 @@ const LeadDetailModal = ({
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
           >
-            {/* Lead Header */}
+            {/* Visitor Header */}
             <View className="items-center mb-6">
-              <View
-                className="rounded-full bg-gradient-to-br from-purple-500 to-pink-500 items-center justify-center mb-3"
-                style={{
-                  width: avatarSize * 4,
-                  height: avatarSize * 4,
-                }}
-              >
-                <Text
-                  className="text-white font-bold"
-                  style={{ fontSize: avatarSize * 1.2 }}
+              {visitor.avatar ? (
+                <Image
+                  source={{ uri: visitor.avatar }}
+                  className="rounded-full mb-3 border-2 border-blue-500"
+                  style={{
+                    width: avatarSize * 4,
+                    height: avatarSize * 4,
+                  }}
+                />
+              ) : (
+                <View
+                  className="rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 items-center justify-center mb-3"
+                  style={{
+                    width: avatarSize * 4,
+                    height: avatarSize * 4,
+                  }}
                 >
-                  {getInitials(lead.firstName, lead.lastName)}
-                </Text>
-              </View>
+                  <Text
+                    className="text-white font-bold"
+                    style={{ fontSize: avatarSize * 1.2 }}
+                  >
+                    {getInitials(visitor.firstName, visitor.lastName)}
+                  </Text>
+                </View>
+              )}
               <Text className="text-xl font-bold text-white text-center">
-                {lead.firstName} {lead.lastName}
+                {visitor.firstName} {visitor.lastName}
               </Text>
               <Text className="text-sm text-gray-400 text-center">
-                {lead.email || "No email"}
+                {visitor.email || "No email"}
               </Text>
               <View className="flex-row gap-2 mt-2">
-                <StatusBadge status={lead.leadStatus} />
-                <PriorityBadge priority={lead.followUpPriority || "medium"} />
+                <PriorityBadge
+                  priority={visitor.followUpPriority || "medium"}
+                />
+                <PotentialBadge
+                  potential={visitor.conversionPotential || "low"}
+                />
               </View>
 
-              {/* Action Buttons */}
+              {/* Call and Email Buttons */}
               <View className="flex-row gap-3 mt-4">
-                {lead.contact && (
+                {visitor.contact && (
                   <TouchableOpacity
                     onPress={handleCallPress}
                     className="flex-row items-center justify-center gap-2 px-4 py-3 bg-green-600 rounded-xl flex-1"
@@ -409,7 +429,7 @@ const LeadDetailModal = ({
                   </TouchableOpacity>
                 )}
 
-                {lead.email && (
+                {visitor.email && (
                   <TouchableOpacity
                     onPress={handleEmailPress}
                     className="flex-row items-center justify-center gap-2 px-4 py-3 bg-blue-600 rounded-xl flex-1"
@@ -423,19 +443,17 @@ const LeadDetailModal = ({
 
             {/* Tabs */}
             <View className="flex-row border-b border-gray-800 mb-4">
-              {(["overview", "details"] as const).map((tab) => (
+              {(["overview", "source"] as const).map((tab) => (
                 <TouchableOpacity
                   key={tab}
                   onPress={() => setActiveTab(tab)}
                   className={`flex-1 py-3 items-center border-b-2 ${
-                    activeTab === tab
-                      ? "border-purple-600"
-                      : "border-transparent"
+                    activeTab === tab ? "border-blue-600" : "border-transparent"
                   }`}
                 >
                   <Text
                     className={`text-sm font-medium ${
-                      activeTab === tab ? "text-purple-400" : "text-gray-400"
+                      activeTab === tab ? "text-blue-400" : "text-gray-400"
                     }`}
                   >
                     {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -451,96 +469,81 @@ const LeadDetailModal = ({
                   <View className="p-3 rounded-lg bg-gray-800">
                     <Text className="text-xs text-gray-400">Contact</Text>
                     <Text className="font-medium text-white mt-1">
-                      {lead.contact || "N/A"}
+                      {visitor.contact || "N/A"}
                     </Text>
                   </View>
                   <View className="p-3 rounded-lg bg-gray-800">
-                    <Text className="text-xs text-gray-400">Created</Text>
+                    <Text className="text-xs text-gray-400">Gender</Text>
                     <Text className="font-medium text-white mt-1">
-                      {new Date(lead.$createdAt).toLocaleDateString()}
+                      {visitor.gender || "N/A"}
                     </Text>
                   </View>
-                  {lead.priorityScore && (
-                    <View className="p-3 rounded-lg bg-gray-800">
-                      <Text className="text-xs text-gray-400">
-                        Priority Score
-                      </Text>
-                      <Text className="font-medium text-white mt-1">
-                        {lead.priorityScore}/100
-                      </Text>
-                    </View>
-                  )}
+                  <View className="p-3 rounded-lg bg-gray-800">
+                    <Text className="text-xs text-gray-400">Date of Birth</Text>
+                    <Text className="font-medium text-white mt-1">
+                      {visitor.dateOfBirth || "N/A"}
+                    </Text>
+                  </View>
+                  <View className="p-3 rounded-lg bg-gray-800">
+                    <Text className="text-xs text-gray-400">Nationality</Text>
+                    <Text className="font-medium text-white mt-1">
+                      {visitor.nationality || "N/A"}
+                    </Text>
+                  </View>
                 </View>
 
-                {lead.interestedArea && (
+                {visitor.address && (
+                  <View className="p-3 rounded-lg bg-gray-800">
+                    <Text className="font-medium text-white mb-2">Address</Text>
+                    <Text className="text-sm text-white">
+                      {visitor.address}
+                      {visitor.city && `, ${visitor.city}`}
+                      {visitor.state && `, ${visitor.state}`}
+                      {visitor.zipCode && ` ${visitor.zipCode}`}
+                    </Text>
+                  </View>
+                )}
+
+                {visitor.interestArea && (
                   <View className="p-3 rounded-lg bg-gray-800">
                     <Text className="font-medium text-white mb-2">
                       Interest Area
                     </Text>
                     <Text className="text-sm text-white">
-                      {lead.interestedArea}
-                    </Text>
-                  </View>
-                )}
-
-                {lead.countries && (
-                  <View className="p-3 rounded-lg bg-gray-800">
-                    <Text className="font-medium text-white mb-2">
-                      Target Countries
-                    </Text>
-                    <Text className="text-sm text-white">{lead.countries}</Text>
-                  </View>
-                )}
-
-                {lead.budgetRange && (
-                  <View className="p-3 rounded-lg bg-gray-800">
-                    <Text className="font-medium text-white mb-2">
-                      Budget Range
-                    </Text>
-                    <Text className="text-sm text-white">
-                      {lead.budgetRange}
+                      {visitor.interestArea}
                     </Text>
                   </View>
                 )}
               </View>
             )}
 
-            {activeTab === "details" && (
+            {activeTab === "source" && (
               <View className="space-y-4">
-                <View className="p-3 rounded-lg bg-purple-500/20">
-                  <Text className="text-xs text-purple-400">Lead Status</Text>
-                  <Text className="font-medium text-white capitalize mt-1">
-                    {lead.leadStatus.replace("_", " ")}
-                  </Text>
-                  <Text className="text-sm text-purple-300 mt-2">
-                    {lead.isConverted
-                      ? "Already converted to student"
-                      : lead.canConvert
-                        ? "Ready for conversion"
-                        : "Needs qualification"}
-                  </Text>
+                <View className="grid grid-cols-2 gap-3">
+                  <View className="p-3 rounded-lg bg-blue-500/20">
+                    <Text className="text-xs text-blue-400">
+                      Referral Source
+                    </Text>
+                    <Text className="font-medium text-white capitalize mt-1">
+                      {visitor.referralSource || "walk_in"}
+                    </Text>
+                  </View>
+                  <View className="p-3 rounded-lg bg-green-500/20">
+                    <Text className="text-xs text-green-400">Visitor Type</Text>
+                    <Text className="font-medium text-white capitalize mt-1">
+                      {visitor.visitorType || "walk_in"}
+                    </Text>
+                  </View>
                 </View>
 
                 <View className="p-3 rounded-lg bg-gray-800">
                   <Text className="font-medium text-white mb-2">
-                    Follow-up Priority
+                    Total Visits
                   </Text>
-                  <Text className="text-sm text-white capitalize">
-                    {lead.followUpPriority || "medium"}
+                  <Text className="text-2xl font-bold text-white">
+                    {visitor.totalVisits || 1}
                   </Text>
                 </View>
-
-                {lead.canConvert && !lead.isConverted && (
-                  <TouchableOpacity
-                    onPress={() => onConvert(lead.$id)}
-                    className="mt-4 flex-row items-center justify-center gap-2 px-4 py-4 bg-gradient-to-r from-green-600 to-emerald-500 rounded-xl"
-                  >
-                    <UserCheck size={20} color="white" />
-                    <Text className="text-white font-medium text-lg">
-                      Convert to Student
-                    </Text>
-                  </TouchableOpacity>
-                )}
               </View>
             )}
           </ScrollView>
@@ -551,8 +554,8 @@ const LeadDetailModal = ({
 };
 
 // ============ MAIN PAGE COMPONENT ============
-export default function LeadsPage() {
-  const [leads, setLeads] = useState<Lead[]>([]);
+export default function VisitorsPage() {
+  const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -560,12 +563,13 @@ export default function LeadsPage() {
     message: string;
     type: "success" | "error" | "info";
   } | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [referralFilter, setReferralFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [selectedVisitorDetail, setSelectedVisitorDetail] =
+    useState<Visitor | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const flatListRef = useRef<FlatList>(null);
 
@@ -611,23 +615,27 @@ export default function LeadsPage() {
     [],
   );
 
-  const fetchLeads = async (isBackgroundUpdate = false) => {
+  const fetchVisitors = async (isBackgroundUpdate = false) => {
     try {
       if (!isBackgroundUpdate) {
         setLoading(true);
       }
 
-      const cacheKey = `leads:${searchQuery}:${statusFilter}:${priorityFilter}`;
+      const cacheKey = `visitors:${searchQuery}:${dateFilter}:${referralFilter}:${priorityFilter}`;
 
-      let url = "/dashboard/leads";
+      let url = "/dashboard/visitors";
       const params = new URLSearchParams();
 
       if (searchQuery && searchQuery.trim().length > 0) {
         params.append("search", searchQuery.trim());
       }
 
-      if (statusFilter && statusFilter !== "all") {
-        params.append("leadStatus", statusFilter);
+      if (dateFilter && dateFilter !== "all") {
+        params.append("dateFilter", dateFilter);
+      }
+
+      if (referralFilter && referralFilter !== "all") {
+        params.append("referralSource", referralFilter);
       }
 
       if (priorityFilter && priorityFilter !== "all") {
@@ -638,17 +646,21 @@ export default function LeadsPage() {
         url += `?${params.toString()}`;
       }
 
-      const leadsData = await cachedFetch<Lead[]>(url, cacheKey, 2 * 60 * 1000);
+      const visitorsData = await cachedFetch<Visitor[]>(
+        url,
+        cacheKey,
+        2 * 60 * 1000,
+      );
 
-      setLeads(leadsData || []);
+      setVisitors(visitorsData || []);
 
-      if (leadsData && leadsData.length === 0 && searchQuery) {
-        showToast("No leads found matching your search", "info");
+      if (visitorsData && visitorsData.length === 0 && searchQuery) {
+        showToast("No visitors found matching your search", "info");
       }
     } catch (error) {
-      console.error("Error fetching leads:", error);
-      showToast("Failed to fetch leads", "error");
-      setLeads([]);
+      console.error("Error fetching visitors:", error);
+      showToast("Failed to fetch visitors", "error");
+      setVisitors([]);
     } finally {
       if (!isBackgroundUpdate) {
         setLoading(false);
@@ -657,120 +669,68 @@ export default function LeadsPage() {
     }
   };
 
-  const handleLeadAction = async (
-    leadId: string,
-    action: string,
-    data?: any,
-  ) => {
-    try {
-      setActionLoading(leadId);
-
-      const response = await fetch(`${API_URL}/dashboard/leads`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          leadId,
-          action,
-          ...data,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        showToast("Action successful", "success");
-        fetchLeads();
-      } else {
-        showToast(result.error || "Failed to update lead", "error");
-      }
-    } catch (error) {
-      showToast("Error updating lead", "error");
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleConvertLead = (leadId: string) => {
-    Alert.alert(
-      "Convert to Student",
-      "Are you sure you want to convert this lead to a student?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Convert",
-          onPress: () => handleLeadAction(leadId, "convert"),
-        },
-      ],
-    );
-  };
-
   useEffect(() => {
-    fetchLeads();
-  }, [searchQuery, statusFilter, priorityFilter]);
+    fetchVisitors();
+  }, [searchQuery, dateFilter, referralFilter, priorityFilter]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    showToast("Refreshing leads...", "info");
-    cacheManager.delete("leads");
-    fetchLeads();
-  }, [fetchLeads]);
+    showToast("Refreshing visitors...", "info");
+    cacheManager.delete("visitors");
+    fetchVisitors();
+  }, [fetchVisitors]);
 
-  const openDetailModal = (lead: Lead) => {
-    setSelectedLead(lead);
+  const openDetailModal = (visitor: Visitor) => {
+    setSelectedVisitorDetail(visitor);
     setDetailModalOpen(true);
   };
 
-  const handleLeadPress = (lead: Lead) => {
-    openDetailModal(lead);
+  const handleVisitorPress = (visitor: Visitor) => {
+    openDetailModal(visitor);
   };
 
   // Calculate statistics
-  const totalLeads = leads.length;
-  const qualifiedLeads = leads.filter(
-    (l) => l.leadStatus === "qualified",
+  const totalVisitors = visitors.length;
+  const highPriorityVisitors = visitors.filter(
+    (v) => v.followUpPriority === "high" || v.followUpPriority === "urgent",
   ).length;
-  const highPriorityLeads = leads.filter(
-    (l) => l.followUpPriority === "high" || l.followUpPriority === "urgent",
-  ).length;
-  const convertibleLeads = leads.filter(
-    (l) => l.canConvert && !l.isConverted,
+  const highPotentialVisitors = visitors.filter(
+    (v) => v.conversionPotential === "high",
   ).length;
 
   const stats = [
     {
       icon: Users,
-      label: "Total Leads",
-      value: totalLeads.toString(),
-      color: "bg-purple-500",
+      label: "Total Visitors",
+      value: totalVisitors.toString(),
+      color: "bg-blue-500",
     },
     {
-      icon: Check,
-      label: "Qualified",
-      value: qualifiedLeads.toString(),
-      color: "bg-green-500",
-    },
-    {
-      icon: TrendingUp,
+      icon: Users,
       label: "High Priority",
-      value: highPriorityLeads.toString(),
+      value: highPriorityVisitors.toString(),
       color: "bg-red-500",
     },
     {
-      icon: UserCheck,
-      label: "Ready to Convert",
-      value: convertibleLeads.toString(),
-      color: "bg-blue-500",
+      icon: TrendingUp,
+      label: "High Potential",
+      value: highPotentialVisitors.toString(),
+      color: "bg-green-500",
     },
   ];
 
-  const statusFilters = [
-    { value: "all", label: "All Status" },
-    { value: "new", label: "New" },
-    { value: "contacted", label: "Contacted" },
-    { value: "qualified", label: "Qualified" },
-    { value: "converted", label: "Converted" },
+  const dateFilters = [
+    { value: "all", label: "All Time" },
+    { value: "today", label: "Today" },
+    { value: "week", label: "Last 7 Days" },
+    { value: "month", label: "Last 30 Days" },
+  ];
+
+  const referralSources = [
+    { value: "all", label: "All Sources" },
+    { value: "walk_in", label: "Walk-in" },
+    { value: "referral", label: "Referral" },
+    { value: "website", label: "Website" },
   ];
 
   const priorityFilters = [
@@ -820,11 +780,11 @@ export default function LeadsPage() {
     );
   };
 
-  if (loading && leads.length === 0) {
+  if (loading && visitors.length === 0) {
     return (
       <SafeAreaView className="flex-1 bg-black items-center justify-center">
-        <ActivityIndicator size="large" color="#8b5cf6" />
-        <Text className="mt-4 text-white">Loading leads...</Text>
+        <ActivityIndicator size="large" color="#3b82f6" />
+        <Text className="mt-4 text-white">Loading visitors...</Text>
       </SafeAreaView>
     );
   }
@@ -847,7 +807,7 @@ export default function LeadsPage() {
                 ? ["#10b981", "#059669"]
                 : toast.type === "error"
                   ? ["#ef4444", "#dc2626"]
-                  : ["#8b5cf6", "#7c3aed"]
+                  : ["#3b82f6", "#2563eb"]
             }
             className="rounded-xl px-4 py-3 flex-row items-center justify-between shadow-2xl"
           >
@@ -865,17 +825,17 @@ export default function LeadsPage() {
       <View className="p-4">
         <View className="flex-row justify-between items-center mb-4">
           <View className="flex-1">
-            <Text className="text-2xl font-bold text-white">Leads</Text>
+            <Text className="text-2xl font-bold text-white">Visitors</Text>
             <Text className="text-sm text-gray-400 mt-1">
-              Manage potential students
+              View visitor information
             </Text>
           </View>
           <TouchableOpacity
             onPress={() => {
-              // Handle create new lead
-              showToast("Create lead functionality", "info");
+              // Handle create new visitor
+              showToast("Create visitor functionality", "info");
             }}
-            className="p-2 bg-gradient-to-r from-purple-600 to-pink-500 rounded-lg"
+            className="p-2 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg"
           >
             <Plus size={20} color="white" />
           </TouchableOpacity>
@@ -890,7 +850,7 @@ export default function LeadsPage() {
             <Search size={searchIconSize} color="#9ca3af" />
           </View>
           <TextInput
-            placeholder="Search leads..."
+            placeholder="Search visitors..."
             placeholderTextColor="#9ca3af"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -908,31 +868,29 @@ export default function LeadsPage() {
           className="flex-row items-center justify-between p-2 mb-4 bg-gray-900 rounded-lg border border-gray-800"
         >
           <Text className="text-white">Filters</Text>
-          <Text className="text-purple-400">
-            {showFilters ? "Hide" : "Show"}
-          </Text>
+          <Text className="text-blue-400">{showFilters ? "Hide" : "Show"}</Text>
         </TouchableOpacity>
 
         {/* Filters */}
         {showFilters && (
           <View className="space-y-3 mb-4">
             <View>
-              <Text className="text-sm text-gray-400 mb-2">Status</Text>
+              <Text className="text-sm text-gray-400 mb-2">Date Range</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View className="flex-row gap-2">
-                  {statusFilters.map((filter) => (
+                  {dateFilters.map((filter) => (
                     <TouchableOpacity
                       key={filter.value}
-                      onPress={() => setStatusFilter(filter.value)}
+                      onPress={() => setDateFilter(filter.value)}
                       className={`px-3 py-1.5 rounded-lg ${
-                        statusFilter === filter.value
-                          ? "bg-purple-600"
+                        dateFilter === filter.value
+                          ? "bg-blue-600"
                           : "bg-gray-900 border border-gray-800"
                       }`}
                     >
                       <Text
                         className={
-                          statusFilter === filter.value
+                          dateFilter === filter.value
                             ? "text-white"
                             : "text-white"
                         }
@@ -947,7 +905,39 @@ export default function LeadsPage() {
             </View>
 
             <View>
-              <Text className="text-sm text-gray-400 mb-2">Priority</Text>
+              <Text className="text-sm text-gray-400 mb-2">
+                Referral Source
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View className="flex-row gap-2">
+                  {referralSources.map((source) => (
+                    <TouchableOpacity
+                      key={source.value}
+                      onPress={() => setReferralFilter(source.value)}
+                      className={`px-3 py-1.5 rounded-lg ${
+                        referralFilter === source.value
+                          ? "bg-blue-600"
+                          : "bg-gray-900 border border-gray-800"
+                      }`}
+                    >
+                      <Text
+                        className={
+                          referralFilter === source.value
+                            ? "text-white"
+                            : "text-white"
+                        }
+                        style={{ fontSize: isSmallScreen ? 12 : 14 }}
+                      >
+                        {source.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+
+            <View>
+              <Text className="text-sm text-gray-400 mb-2">Priority Level</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View className="flex-row gap-2">
                   {priorityFilters.map((priority) => (
@@ -956,7 +946,7 @@ export default function LeadsPage() {
                       onPress={() => setPriorityFilter(priority.value)}
                       className={`px-3 py-1.5 rounded-lg ${
                         priorityFilter === priority.value
-                          ? "bg-purple-600"
+                          ? "bg-blue-600"
                           : "bg-gray-900 border border-gray-800"
                       }`}
                     >
@@ -1000,22 +990,25 @@ export default function LeadsPage() {
         </ScrollView>
       </View>
 
-      {/* Leads Grid */}
+      {/* Visitors Grid */}
       <FlatList
         ref={flatListRef}
-        data={leads}
+        data={visitors}
         numColumns={isLargeScreen ? 3 : isMediumScreen ? 2 : 1}
         key={isLargeScreen ? "3" : isMediumScreen ? "2" : "1"}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
-          <LeadCard lead={item} onPress={() => handleLeadPress(item)} />
+          <VisitorCard
+            visitor={item}
+            onPress={() => handleVisitorPress(item)}
+          />
         )}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#8b5cf6"]}
-            tintColor="#8b5cf6"
+            colors={["#3b82f6"]}
+            tintColor="#3b82f6"
           />
         }
         contentContainerStyle={{ paddingBottom: 20 }}
@@ -1026,7 +1019,7 @@ export default function LeadsPage() {
               className="font-medium mt-4 text-white text-center"
               style={{ fontSize: isSmallScreen ? 16 : 18 }}
             >
-              {searchQuery ? "No matching leads found" : "No leads yet"}
+              {searchQuery ? "No matching visitors found" : "No visitors yet"}
             </Text>
             <Text
               className="text-gray-400 mt-2 text-center"
@@ -1034,21 +1027,20 @@ export default function LeadsPage() {
             >
               {searchQuery
                 ? "Try a different search term"
-                : "Get started by creating your first lead"}
+                : "No visitors available"}
             </Text>
           </View>
         }
       />
 
-      {/* Lead Detail Modal */}
-      <LeadDetailModal
-        lead={selectedLead}
+      {/* Visitor Detail Modal */}
+      <VisitorDetailModal
+        visitor={selectedVisitorDetail}
         isOpen={detailModalOpen}
         onClose={() => {
           setDetailModalOpen(false);
-          setSelectedLead(null);
+          setSelectedVisitorDetail(null);
         }}
-        onConvert={handleConvertLead}
       />
     </SafeAreaView>
   );

@@ -1,10 +1,5 @@
 import { Tabs } from "expo-router";
-import {
-  BookOpen,
-  FileText,
-  Globe,
-  GraduationCap
-} from "lucide-react-native";
+import { BookOpen, Globe, GraduationCap } from "lucide-react-native";
 
 export default function TabLayout() {
   return (
@@ -36,20 +31,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="email" // This will be app/(tabs)/email.tsx
+        name="branches" // This will be app/(tabs)/branches.tsx
         options={{
-          title: "Email",
+          title: "Branches",
           tabBarIcon: ({ size, color }) => (
             <BookOpen size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile" // This will be app/(tabs)/profile.tsx
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ size, color }) => (
-            <FileText size={size} color={color} />
           ),
         }}
       />
