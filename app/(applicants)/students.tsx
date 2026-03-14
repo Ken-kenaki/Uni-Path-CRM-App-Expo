@@ -1,6 +1,7 @@
 // app/(tabs)/students.tsx
-import { API_URL } from "@/config";
+import { api } from "@/lib/api";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import {
   Calendar,
   Mail,
@@ -459,12 +460,13 @@ export default function StudentsPage() {
         return cachedData;
       }
 
-      const response = await fetch(`${API_URL}${url}`);
-      const result = await response.json();
+      const result = await api.getStudents(
+        Object.fromEntries(new URL(`https://x${url}`).searchParams),
+      );
 
       if (result.success) {
         cacheManager.set(cacheKey, result.data || result, ttl);
-        return result.data || result;
+        return (result.data || result) as T;
       } else {
         throw new Error(result.error || "Fetch failed");
       }
@@ -517,13 +519,10 @@ export default function StudentsPage() {
     fetchStudents();
   }, [fetchStudents]);
 
-  const openDetailModal = (student: Student) => {
-    setSelectedStudentDetail(student);
-    setDetailModalOpen(true);
-  };
+  const router = useRouter();
 
   const handleStudentPress = (student: Student) => {
-    openDetailModal(student);
+    router.push(`/student/${student.$id}` as any);
   };
 
   const filteredStudents = useMemo(() => {

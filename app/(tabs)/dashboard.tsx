@@ -1,5 +1,5 @@
 // app/(tabs)/analytics.tsx
-import { API_URL } from "@/config";
+import { api } from "@/lib/api";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -231,11 +231,10 @@ export default function AnalyticsPage() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/dashboard/summary`);
-      const result = await response.json();
+      const result = await api.getSummary();
 
       if (result.success) {
-        setDashboardData(result);
+        setDashboardData(result as any);
         setError(null);
         showToast("Data updated successfully", "success");
       } else {

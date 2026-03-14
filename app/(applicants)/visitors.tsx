@@ -1,5 +1,5 @@
 // app/(tabs)/visitors.tsx
-import { API_URL } from "@/config";
+import { api } from "@/lib/api";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Calendar,
@@ -593,17 +593,13 @@ export default function VisitorsPage() {
       }
 
       try {
-        const response = await fetch(`${API_URL}${url}`);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
+        const result = await api.getVisitors(
+          Object.fromEntries(new URL(`https://x${url}`).searchParams),
+        );
 
         if (result.success) {
           cacheManager.set(cacheKey, result.data || result, ttl);
-          return result.data || result;
+          return (result.data || result) as T;
         } else {
           throw new Error(result.error || "Fetch failed");
         }

@@ -1,4 +1,5 @@
 // app/(tabs)/branches.tsx
+import { api } from "@/lib/api";
 import { API_URL } from "@/config";
 import { Theme } from "@/theme";
 import * as Haptics from "expo-haptics";
@@ -550,8 +551,7 @@ export default function BranchesPage() {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await fetch(`${API_URL}/auth/current`);
-      const result = await response.json();
+      const result = await api.getCurrentUser() as any;
       if (result.success) {
         setCurrentUser(result.user);
         if (result.user.organizationId) {
@@ -565,10 +565,7 @@ export default function BranchesPage() {
 
   const fetchOrganization = async (organizationId: string) => {
     try {
-      const response = await fetch(
-        `${API_URL}/dashboard/organizations/${organizationId}`,
-      );
-      const result = await response.json();
+      const result = await api.getOrganization(organizationId);
       if (result.success) {
         setOrganization(result.data);
       }
@@ -580,12 +577,11 @@ export default function BranchesPage() {
   const fetchBranches = useCallback(async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-      if (searchQuery) params.append("search", searchQuery);
-      if (filterStatus !== "all") params.append("status", filterStatus);
+      const params: Record<string, string> = {};
+      if (searchQuery) params.search = searchQuery;
+      if (filterStatus !== "all") params.status = filterStatus;
 
-      const response = await fetch(`${API_URL}/dashboard/branches?${params}`);
-      const result = await response.json();
+      const result = await api.getBranches(params);
 
       if (result.success) {
         setBranches(result.data || []);
@@ -637,21 +633,9 @@ export default function BranchesPage() {
     if (!validateForm()) return;
 
     try {
-      const url = editingBranch
-        ? `${API_URL}/dashboard/branches/${editingBranch.id}`
-        : `${API_URL}/dashboard/branches`;
-
-      const method = editingBranch ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(branchFormData),
-      });
-
-      const result = await response.json();
+      const result = editingBranch
+        ? await api.updateBranch(editingBranch.id, branchFormData)
+        : await api.createBranch(branchFormData);
 
       if (result.success) {
         showToast(
@@ -696,14 +680,7 @@ export default function BranchesPage() {
           style: "destructive",
           onPress: async () => {
             try {
-              const response = await fetch(
-                `${API_URL}/dashboard/branches/${branchId}`,
-                {
-                  method: "DELETE",
-                },
-              );
-
-              const result = await response.json();
+              const result = await api.deleteBranch(branchId);
 
               if (result.success) {
                 showToast("Branch deactivated successfully", "success");
@@ -746,20 +723,7 @@ export default function BranchesPage() {
           text: action.charAt(0).toUpperCase() + action.slice(1),
           onPress: async () => {
             try {
-              const response = await fetch(
-                `${API_URL}/dashboard/branches/${branchId}`,
-                {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    status: newStatus,
-                  }),
-                },
-              );
-
-              const result = await response.json();
+              const result = await api.updateBranch(branchId, { status: newStatus });
 
               if (result.success) {
                 showToast(`Branch ${action}d successfully`, "success");

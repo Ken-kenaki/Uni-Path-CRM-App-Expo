@@ -1,5 +1,5 @@
 // app/(tabs)/leads.tsx
-import { API_URL } from "@/config";
+import { api } from "@/lib/api";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Calendar,
@@ -589,17 +589,13 @@ export default function LeadsPage() {
       }
 
       try {
-        const response = await fetch(`${API_URL}${url}`);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
+        const result = await api.getLeads(
+          Object.fromEntries(new URL(`https://x${url}`).searchParams),
+        );
 
         if (result.success) {
           cacheManager.set(cacheKey, result.data || result, ttl);
-          return result.data || result;
+          return (result.data || result) as T;
         } else {
           throw new Error(result.error || "Fetch failed");
         }
@@ -665,19 +661,11 @@ export default function LeadsPage() {
     try {
       setActionLoading(leadId);
 
-      const response = await fetch(`${API_URL}/dashboard/leads`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const result = await api.updateLead("", {
           leadId,
           action,
           ...data,
-        }),
-      });
-
-      const result = await response.json();
+        });
 
       if (result.success) {
         showToast("Action successful", "success");

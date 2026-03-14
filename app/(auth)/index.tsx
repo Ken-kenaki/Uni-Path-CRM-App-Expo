@@ -1,11 +1,11 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/lib/toast-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   SafeAreaView,
   ScrollView,
   Text,
@@ -22,90 +22,20 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { login } = useAuth();
+  const { showToast } = useToast();
 
   const handleSubmit = async () => {
     setIsLoading(true);
     setError("");
 
     try {
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        },
-      );
-
-      const data = await response.json();
-
-      console.log("Login API Response:", data); // Debug log
-
-      if (!response.ok) {
-        throw new Error(data.error || `Login failed: ${response.status}`);
-      }
-
-      // Check if login was successful
-      if (!data.success) {
-        throw new Error(data.error || "Login failed");
-      }
-
-      // Store user data in AsyncStorage
-      if (data.data && data.data.profile) {
-        await AsyncStorage.setItem("user", JSON.stringify(data.data));
-        console.log("User data stored:", data.data.profile.email);
-      }
-
-      // ⚠️ CRITICAL FIX: The role is in data.data.profile, not data.user
-      // Your API returns: data.data.profile.role, not data.user.role
-
-      // Get the user role from the profile data
-      const userRole = data.data?.profile?.role;
-
-      if (!userRole) {
-        console.error("No role found in response:", data);
-        throw new Error("User role not found in response");
-      }
-
-      console.log("Login successful, user role:", userRole);
-
-      // Redirect based on user role
-      if (userRole === "admin") {
-        router.replace("/(tabs)/dashboard");
-      } else if (userRole === "owner") {
-        router.replace("/(tabs)/dashboard");
-      } else if (userRole === "staff" || userRole === "user") {
-        router.replace("/(tabs)/dashboard");
-      } else {
-        console.warn("Unknown role:", userRole);
-        // Default to dashboard for unknown roles
-        router.replace("/(tabs)/dashboard");
-      }
+      await login(email, password);
+      // Auth context handles redirect to (tabs) on success
     } catch (err: any) {
-      console.error("Login error details:", err);
-      console.error("Full error object:", JSON.stringify(err, null, 2));
-
-      let errorMessage = err.message || "An unexpected error occurred";
-
-      if (err.message.includes("Invalid email or password")) {
-        errorMessage = "Invalid email or password";
-      } else if (err.message.includes("Account not activated")) {
-        errorMessage = "Your account is not activated. Please contact support.";
-      } else if (err.message.includes("Organization disabled")) {
-        errorMessage = "Your organization account has been disabled.";
-      } else if (err.message.includes("User profile not found")) {
-        errorMessage = "User profile not found. Please contact support.";
-      } else if (
-        err.message.includes("fetch failed") ||
-        err.message.includes("network")
-      ) {
-        errorMessage = "Network error. Please check your connection.";
-      }
-
+      const errorMessage = err.message || "An unexpected error occurred";
       setError(errorMessage);
-      Alert.alert("Login Failed", errorMessage);
+      showToast(errorMessage, "error");
     } finally {
       setIsLoading(false);
     }

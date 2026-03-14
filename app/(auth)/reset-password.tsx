@@ -1,10 +1,11 @@
+import { api } from '@/lib/api';
+import { useToast } from '@/lib/toast-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { AlertCircle, Check, CheckCircle, ChevronLeft, Eye, EyeOff } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     SafeAreaView,
     ScrollView,
     Text,
@@ -24,6 +25,7 @@ export default function ResetPasswordScreen() {
   const [isValidating, setIsValidating] = useState(true);
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { showToast } = useToast();
 
   const userId = params.userId as string;
   const secret = params.secret as string;
@@ -68,33 +70,21 @@ export default function ResetPasswordScreen() {
     }
 
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/reset-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          userId, 
-          secret, 
-          password,
-          passwordRepeat: confirmPassword
-        }),
-      });
+      const result = await api.resetPassword(userId, secret, password, confirmPassword);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to reset password');
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to reset password');
       }
 
       setSuccess(true);
+      showToast('Password reset successful!', 'success');
 
       setTimeout(() => {
-        router.replace('/login');
+        router.replace('/(auth)' as any);
       }, 3000);
     } catch (err: any) {
       setError(err.message);
-      Alert.alert('Error', err.message);
+      showToast(err.message, 'error');
     } finally {
       setLoading(false);
     }

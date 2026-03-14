@@ -1,10 +1,11 @@
+import { api } from '@/lib/api';
+import { useToast } from '@/lib/toast-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { AlertCircle, CheckCircle, ChevronLeft } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     SafeAreaView,
     ScrollView,
     Text,
@@ -19,6 +20,7 @@ export default function ForgotPasswordScreen() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -26,30 +28,22 @@ export default function ForgotPasswordScreen() {
     setSuccess(false);
 
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/forgot-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const result = await api.forgotPassword(email);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Something went wrong');
+      if (!result.success) {
+        throw new Error(result.error || 'Something went wrong');
       }
 
       setSuccess(true);
       setEmail('');
+      showToast('Reset link sent!', 'success');
 
-      // Auto-redirect after success
       setTimeout(() => {
-        router.push('/login');
+        router.back();
       }, 3000);
     } catch (err: any) {
       setError(err.message);
-      Alert.alert('Error', err.message);
+      showToast(err.message, 'error');
     } finally {
       setLoading(false);
     }
