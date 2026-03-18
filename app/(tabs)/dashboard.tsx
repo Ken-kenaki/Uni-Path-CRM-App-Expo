@@ -574,7 +574,7 @@ export default function AnalyticsPage() {
             onPress={onAction}
             className="p-1.5 rounded-lg bg-gray-800"
           >
-            <Eye size={16} color={blackTheme.textMuted} />
+            <Eye size={16} color="#9ca3af" />
           </TouchableOpacity>
         )}
       </View>
@@ -706,12 +706,12 @@ export default function AnalyticsPage() {
             // Fixed: Check if status exists before splitting
             const statusText = activity.status
               ? activity.status
-                  .split("_")
-                  .map(
-                    (word: string) =>
-                      word.charAt(0).toUpperCase() + word.slice(1),
-                  )
-                  .join(" ")
+                .split("_")
+                .map(
+                  (word: string) =>
+                    word.charAt(0).toUpperCase() + word.slice(1),
+                )
+                .join(" ")
               : "Unknown";
 
             return (
@@ -945,11 +945,11 @@ export default function AnalyticsPage() {
         {/* Search */}
         <View className="relative mb-3">
           <View className="absolute left-4 top-0 bottom-0 justify-center z-10">
-            <Search size={20} color={blackTheme.textMuted} />
+            <Search size={20} color="#9ca3af" />
           </View>
           <TextInput
             placeholder="Search analytics"
-            placeholderTextColor={blackTheme.textMuted}
+            placeholderTextColor="#9ca3af"
             value={searchQuery}
             onChangeText={setSearchQuery}
             className={`pl-12 pr-4 py-3.5 ${blackTheme.card} placeholder:text-white rounded-2xl border ${blackTheme.border} ${blackTheme.text} text-base font-medium`}
@@ -959,7 +959,7 @@ export default function AnalyticsPage() {
               onPress={() => setSearchQuery("")}
               className="absolute right-4 top-0 bottom-0 justify-center"
             >
-              <X size={20} color={blackTheme.textMuted} />
+              <X size={20} color="#9ca3af" />
             </TouchableOpacity>
           ) : null}
         </View>

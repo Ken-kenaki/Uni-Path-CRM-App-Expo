@@ -5,9 +5,10 @@ import { useRouter } from "expo-router";
 import {
   ArrowLeft,
   CheckCircle,
+  ChevronDown,
+  ChevronUp,
   FileText,
-  Plus,
-  Search,
+  Search
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -38,6 +39,7 @@ export default function DocumentTemplatesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const fetchTemplates = useCallback(async () => {
     try {
@@ -64,47 +66,76 @@ export default function DocumentTemplatesScreen() {
     (t) => !search || t.templateName?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const renderItem = ({ item }: { item: DocTemplate }) => (
-    <Animated.View entering={FadeIn.duration(300)}>
-      <View className="mx-4 mb-3 p-4 rounded-2xl bg-[#111111] border border-[#1f1f1f]">
-        <View className="flex-row items-center">
-          <View className="w-10 h-10 rounded-xl bg-purple-500/15 items-center justify-center">
-            <FileText size={18} color="#8b5cf6" />
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const renderItem = ({ item }: { item: DocTemplate }) => {
+    const isExpanded = expandedIds.has(item.$id);
+    const hasManyDocs = item.documents && item.documents.length > 3;
+    const docsToShow = isExpanded ? item.documents : item.documents?.slice(0, 3);
+
+    return (
+      <Animated.View entering={FadeIn.duration(300)}>
+        <TouchableOpacity
+          className="mx-4 mb-3 p-4 rounded-2xl bg-[#111111] border border-[#1f1f1f]"
+          onPress={() => hasManyDocs && toggleExpand(item.$id)}
+          activeOpacity={hasManyDocs ? 0.7 : 1}
+        >
+          <View className="flex-row items-center">
+            <View className="w-10 h-10 rounded-xl bg-purple-500/15 items-center justify-center">
+              <FileText size={18} color="#8b5cf6" />
+            </View>
+            <View className="flex-1 ml-3">
+              <Text className="text-white font-semibold text-[15px]">{item.templateName}</Text>
+              {item.description && (
+                <Text className="text-gray-500 text-xs mt-0.5" numberOfLines={1}>
+                  {item.description}
+                </Text>
+              )}
+            </View>
+            <View className="flex-row items-center">
+              {item.documents && (
+                <View className="px-2 py-0.5 rounded-full bg-[#1a1a1a] mr-2">
+                  <Text className="text-gray-400 text-xs">
+                    {item.documents.length} docs
+                  </Text>
+                </View>
+              )}
+              {hasManyDocs && (
+                isExpanded ? <ChevronUp size={18} color="#6b7280" /> : <ChevronDown size={18} color="#6b7280" />
+              )}
+            </View>
           </View>
-          <View className="flex-1 ml-3">
-            <Text className="text-white font-semibold text-[15px]">{item.templateName}</Text>
-            {item.description && (
-              <Text className="text-gray-500 text-xs mt-0.5" numberOfLines={1}>
-                {item.description}
-              </Text>
-            )}
-          </View>
-          {item.documents && (
-            <View className="px-2 py-0.5 rounded-full bg-[#1a1a1a]">
-              <Text className="text-gray-400 text-xs">
-                {item.documents.length} docs
-              </Text>
+          {item.documents && item.documents.length > 0 && (
+            <View className="mt-3 pt-3 border-t border-[#1f1f1f]">
+              {docsToShow?.map((doc: any, idx: number) => (
+                <View key={idx} className="flex-row items-center mb-1.5">
+                  <CheckCircle size={12} color="#6b7280" />
+                  <Text className="text-gray-400 text-xs ml-2">{doc.name || doc.documentName || `Document ${idx + 1}`}</Text>
+                </View>
+              ))}
+              {hasManyDocs && !isExpanded && (
+                <Text className="text-purple-500/80 text-xs ml-5 font-medium mt-1">
+                  + Show {item.documents.length - 3} more
+                </Text>
+              )}
+              {hasManyDocs && isExpanded && (
+                <Text className="text-gray-600 text-xs ml-5 font-medium mt-1">
+                  Show less
+                </Text>
+              )}
             </View>
           )}
-        </View>
-        {item.documents && item.documents.length > 0 && (
-          <View className="mt-3 pt-3 border-t border-[#1f1f1f]">
-            {item.documents.slice(0, 3).map((doc: any, idx: number) => (
-              <View key={idx} className="flex-row items-center mb-1.5">
-                <CheckCircle size={12} color="#6b7280" />
-                <Text className="text-gray-400 text-xs ml-2">{doc.name || doc.documentName || `Document ${idx + 1}`}</Text>
-              </View>
-            ))}
-            {item.documents.length > 3 && (
-              <Text className="text-gray-600 text-xs ml-5">
-                +{item.documents.length - 3} more
-              </Text>
-            )}
-          </View>
-        )}
-      </View>
-    </Animated.View>
-  );
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
 
   if (loading) {
     return (

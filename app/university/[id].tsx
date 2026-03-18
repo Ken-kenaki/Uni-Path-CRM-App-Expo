@@ -13,6 +13,7 @@ import {
   GraduationCap,
   MapPin,
   RefreshCw,
+  Users,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -31,17 +32,20 @@ export default function UniversityDetailScreen() {
   const { showToast } = useToast();
   const [university, setUniversity] = useState<any>(null);
   const [courses, setCourses] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"info" | "courses">("info");
+  const [activeTab, setActiveTab] = useState<"info" | "courses" | "students">("info");
 
   const fetchData = useCallback(async () => {
     try {
-      const [uniRes, coursesRes] = await Promise.all([
+      const [uniRes, coursesRes, studentsRes] = await Promise.all([
         api.getUniversity(id),
         api.getUniversityCourses(id),
+        api.getUniversityStudents(id),
       ]);
       if (uniRes.success) setUniversity(uniRes.data);
       if (coursesRes.success) setCourses(coursesRes.data?.documents || coursesRes.data || []);
+      if (studentsRes.success) setStudents(studentsRes.data?.students || studentsRes.data || []);
     } catch {
       showToast("Failed to load university", "error");
     } finally {
@@ -87,14 +91,11 @@ export default function UniversityDetailScreen() {
           <Text className="text-white font-bold text-lg" numberOfLines={1}>
             {university.name}
           </Text>
-          {(university.city || university.countries?.name) && (
-            <View className="flex-row items-center mt-0.5">
-              <MapPin size={12} color="#6b7280" />
-              <Text className="text-gray-500 text-xs ml-1">
-                {[university.city, university.countries?.name].filter(Boolean).join(", ")}
-              </Text>
-            </View>
-          )}
+          <View className="flex-row items-center mt-0.5">
+            <Text className="text-gray-500 text-xs">
+              {courses.length} courses • {students.length} students
+            </Text>
+          </View>
         </View>
         <TouchableOpacity onPress={fetchData} className="p-2">
           <RefreshCw size={18} color="#6b7280" />
@@ -102,19 +103,21 @@ export default function UniversityDetailScreen() {
       </View>
 
       {/* Tabs */}
-      <View className="flex-row px-4 mb-3">
-        {(["info", "courses"] as const).map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            onPress={() => setActiveTab(tab)}
-            className={`mr-2 px-5 py-2 rounded-xl ${activeTab === tab ? "bg-purple-600" : "bg-[#1a1a1a]"}`}
-          >
-            <Text className={`text-sm font-medium ${activeTab === tab ? "text-white" : "text-gray-400"}`}>
-              {tab === "info" ? "Info" : `Courses (${courses.length})`}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="max-h-12 mb-3">
+        <View className="flex-row px-4">
+          {(["info", "courses", "students"] as const).map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              onPress={() => setActiveTab(tab)}
+              className={`mr-2 px-5 py-2 rounded-xl h-10 ${activeTab === tab ? "bg-purple-600" : "bg-[#1a1a1a]"}`}
+            >
+              <Text className={`text-sm font-medium ${activeTab === tab ? "text-white" : "text-gray-400"}`}>
+                {tab === "info" ? "Info" : tab === "courses" ? `Courses (${courses.length})` : `Students (${students.length})`}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
 
       {activeTab === "info" ? (
         <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
@@ -134,6 +137,7 @@ export default function UniversityDetailScreen() {
             <InfoRow icon={Globe} label="Country" value={university.countries?.name} />
             <InfoRow icon={MapPin} label="City" value={university.city} />
             <InfoRow icon={BookOpen} label="Courses" value={`${courses.length} available`} />
+            <InfoRow icon={Users} label="Enrolled Students" value={`${students.length} students`} />
             {university.website && <InfoRow icon={Globe} label="Website" value={university.website} />}
             {university.description && (
               <View className="mt-2">
@@ -144,7 +148,7 @@ export default function UniversityDetailScreen() {
           </View>
           <View className="h-8" />
         </ScrollView>
-      ) : (
+      ) : activeTab === "courses" ? (
         <FlatList
           data={courses}
           keyExtractor={(item, i) => item.$id || String(i)}
@@ -152,7 +156,10 @@ export default function UniversityDetailScreen() {
           renderItem={({ item }) => {
             const lvlColor = LEVEL_COLORS[item.level] || "#6b7280";
             return (
-              <View className="mb-3 p-4 rounded-xl bg-[#111111] border border-[#1f1f1f]">
+              <TouchableOpacity
+                onPress={() => router.push(`/course/${item.$id}` as any)}
+                className="mb-3 p-4 rounded-xl bg-[#111111] border border-[#1f1f1f]"
+              >
                 <View className="flex-row items-start">
                   <View className="flex-1">
                     <Text className="text-white font-semibold text-sm" numberOfLines={2}>
@@ -189,13 +196,48 @@ export default function UniversityDetailScreen() {
                     </View>
                   )}
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           }}
           ListEmptyComponent={
             <View className="items-center py-16">
               <BookOpen size={40} color="#374151" />
               <Text className="text-gray-500 mt-3">No courses found</Text>
+            </View>
+          }
+        />
+      ) : (
+        <FlatList
+          data={students}
+          keyExtractor={(item, i) => item.$id || String(i)}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => router.push(`/student/${item.$id}` as any)}
+              className="mb-3 p-4 rounded-xl bg-[#111111] border border-[#1f1f1f]"
+            >
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-xl bg-green-500/15 items-center justify-center">
+                  <Users size={18} color="#10b981" />
+                </View>
+                <View className="flex-1 ml-3">
+                  <Text className="text-white font-semibold text-sm" numberOfLines={1}>
+                    {item.firstName} {item.lastName}
+                  </Text>
+                  <Text className="text-gray-500 text-xs mt-1" numberOfLines={1}>
+                    {item.email}
+                  </Text>
+                </View>
+                <View className={`px-2 py-0.5 rounded-full bg-blue-500/10`}>
+                  <Text className="text-[10px] text-blue-400 font-medium uppercase">{item.leadStatus || "New"}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            <View className="items-center py-16">
+              <Users size={40} color="#374151" />
+              <Text className="text-gray-500 mt-3">No students found</Text>
             </View>
           }
         />

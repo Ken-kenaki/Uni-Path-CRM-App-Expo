@@ -76,55 +76,57 @@ export default function CoursesScreen() {
   };
 
   const renderItem = ({ item }: { item: Course }) => (
-    <Animated.View entering={FadeIn.duration(300)}>
-      <View className="mx-4 mb-3 p-4 rounded-2xl bg-[#111111] border border-[#1f1f1f]">
-        <View className="flex-row items-start">
-          <View className="w-10 h-10 rounded-xl bg-amber-500/15 items-center justify-center">
-            <BookOpen size={18} color="#f59e0b" />
+    <TouchableOpacity onPress={() => router.push(`/course/${item.$id}` as any)}>
+      <Animated.View entering={FadeIn.duration(300)}>
+        <View className="mx-4 mb-3 p-4 rounded-2xl bg-[#111111] border border-[#1f1f1f]">
+          <View className="flex-row items-start">
+            <View className="w-10 h-10 rounded-xl bg-amber-500/15 items-center justify-center">
+              <BookOpen size={18} color="#f59e0b" />
+            </View>
+            <View className="flex-1 ml-3">
+              <Text className="text-white font-semibold text-[15px]" numberOfLines={2}>
+                {item.name}
+              </Text>
+              {getUniName(item.university) ? (
+                <View className="flex-row items-center mt-1">
+                  <School size={12} color="#6b7280" />
+                  <Text className="text-gray-500 text-xs ml-1" numberOfLines={1}>
+                    {getUniName(item.university)}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+            {item.level && (
+              <View className="px-2 py-0.5 rounded-full bg-purple-500/15">
+                <Text className="text-purple-400 text-[10px] font-medium">{item.level}</Text>
+              </View>
+            )}
           </View>
-          <View className="flex-1 ml-3">
-            <Text className="text-white font-semibold text-[15px]" numberOfLines={2}>
-              {item.name}
-            </Text>
-            {getUniName(item.university) ? (
-              <View className="flex-row items-center mt-1">
-                <School size={12} color="#6b7280" />
-                <Text className="text-gray-500 text-xs ml-1" numberOfLines={1}>
-                  {getUniName(item.university)}
+          <View className="flex-row items-center mt-3 pt-3 border-t border-[#1f1f1f] gap-4">
+            {item.duration && (
+              <View className="flex-row items-center">
+                <Clock size={12} color="#6b7280" />
+                <Text className="text-gray-500 text-xs ml-1">{item.duration}</Text>
+              </View>
+            )}
+            {item.fees != null && item.fees > 0 && (
+              <View className="flex-row items-center">
+                <DollarSign size={12} color="#6b7280" />
+                <Text className="text-gray-500 text-xs ml-1">
+                  {new Intl.NumberFormat("en-US").format(item.fees)}
                 </Text>
               </View>
-            ) : null}
+            )}
+            {item.intake && (
+              <View className="flex-row items-center">
+                <Calendar size={12} color="#6b7280" />
+                <Text className="text-gray-500 text-xs ml-1">{item.intake}</Text>
+              </View>
+            )}
           </View>
-          {item.level && (
-            <View className="px-2 py-0.5 rounded-full bg-purple-500/15">
-              <Text className="text-purple-400 text-[10px] font-medium">{item.level}</Text>
-            </View>
-          )}
         </View>
-        <View className="flex-row items-center mt-3 pt-3 border-t border-[#1f1f1f] gap-4">
-          {item.duration && (
-            <View className="flex-row items-center">
-              <Clock size={12} color="#6b7280" />
-              <Text className="text-gray-500 text-xs ml-1">{item.duration}</Text>
-            </View>
-          )}
-          {item.fees != null && item.fees > 0 && (
-            <View className="flex-row items-center">
-              <DollarSign size={12} color="#6b7280" />
-              <Text className="text-gray-500 text-xs ml-1">
-                {new Intl.NumberFormat("en-US").format(item.fees)}
-              </Text>
-            </View>
-          )}
-          {item.intake && (
-            <View className="flex-row items-center">
-              <Calendar size={12} color="#6b7280" />
-              <Text className="text-gray-500 text-xs ml-1">{item.intake}</Text>
-            </View>
-          )}
-        </View>
-      </View>
-    </Animated.View>
+      </Animated.View>
+    </TouchableOpacity>
   );
 
   if (loading) {

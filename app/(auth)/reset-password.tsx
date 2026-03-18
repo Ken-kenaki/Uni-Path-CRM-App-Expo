@@ -5,14 +5,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { AlertCircle, Check, CheckCircle, ChevronLeft, Eye, EyeOff } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ResetPasswordScreen() {
   const [password, setPassword] = useState('');
@@ -42,7 +42,7 @@ export default function ResetPasswordScreen() {
     } else {
       setError('Invalid or expired reset link');
     }
-    
+
     setIsValidating(false);
   }, [userId, secret, expire]);
 

@@ -6,13 +6,14 @@ import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  SafeAreaView,
+  Linking,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -157,7 +158,7 @@ export default function LoginScreen() {
             <TouchableOpacity>
               <Text className="text-gray-500 text-sm">Help</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL("https://aestheracrm.aesthera.uk/privacy-policy")}>
               <Text className="text-gray-500 text-sm">Privacy</Text>
             </TouchableOpacity>
             <TouchableOpacity>

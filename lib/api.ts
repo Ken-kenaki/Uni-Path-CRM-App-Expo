@@ -286,9 +286,21 @@ class ApiClient {
     return this.request(`/dashboard/universities/${id}/courses`);
   }
 
+  async getUniversityStudents(id: string) {
+    return this.request(`/dashboard/universities/${id}/students`);
+  }
+
   // Courses
   async getCourses() {
     return this.request("/dashboard/courses");
+  }
+
+  async getCourse(id: string) {
+    return this.request(`/dashboard/courses/${id}`);
+  }
+
+  async getCourseStudents(id: string) {
+    return this.request(`/dashboard/courses/${id}/students`);
   }
 
   // Branches

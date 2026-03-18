@@ -29,17 +29,20 @@ export default function CountryDetailScreen() {
   const { showToast } = useToast();
   const [country, setCountry] = useState<any>(null);
   const [universities, setUniversities] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"info" | "universities">("info");
+  const [activeTab, setActiveTab] = useState<"info" | "universities" | "students">("info");
 
   const fetchData = useCallback(async () => {
     try {
-      const [countryRes, uniRes] = await Promise.all([
+      const [countryRes, uniRes, studentsRes] = await Promise.all([
         api.getCountry(id),
         api.getCountryUniversities(id),
+        api.getCountryStudents(id),
       ]);
       if (countryRes.success) setCountry(countryRes.data);
       if (uniRes.success) setUniversities(uniRes.data?.documents || uniRes.data || []);
+      if (studentsRes.success) setStudents(studentsRes.data?.students || studentsRes.data || []);
     } catch {
       showToast("Failed to load country", "error");
     } finally {
@@ -78,7 +81,9 @@ export default function CountryDetailScreen() {
           <Text className="text-white font-bold text-lg" numberOfLines={1}>
             {country.name}
           </Text>
-          <Text className="text-gray-500 text-xs">{universities.length} universities</Text>
+          <Text className="text-gray-500 text-xs">
+            {universities.length} universities • {students.length} students
+          </Text>
         </View>
         <TouchableOpacity onPress={fetchData} className="p-2">
           <RefreshCw size={18} color="#6b7280" />
@@ -86,19 +91,21 @@ export default function CountryDetailScreen() {
       </View>
 
       {/* Tabs */}
-      <View className="flex-row px-4 mb-3">
-        {(["info", "universities"] as const).map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            onPress={() => setActiveTab(tab)}
-            className={`mr-2 px-5 py-2 rounded-xl ${activeTab === tab ? "bg-purple-600" : "bg-[#1a1a1a]"}`}
-          >
-            <Text className={`text-sm font-medium ${activeTab === tab ? "text-white" : "text-gray-400"}`}>
-              {tab === "info" ? "Info" : `Universities (${universities.length})`}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="max-h-12 mb-3">
+        <View className="flex-row px-4">
+          {(["info", "universities", "students"] as const).map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              onPress={() => setActiveTab(tab)}
+              className={`mr-2 px-5 py-2 rounded-xl h-10 ${activeTab === tab ? "bg-purple-600" : "bg-[#1a1a1a]"}`}
+            >
+              <Text className={`text-sm font-medium ${activeTab === tab ? "text-white" : "text-gray-400"}`}>
+                {tab === "info" ? "Info" : tab === "universities" ? `Universities (${universities.length})` : `Students (${students.length})`}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
 
       {activeTab === "info" ? (
         <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
@@ -119,7 +126,7 @@ export default function CountryDetailScreen() {
             </View>
             <View className="flex-1 p-4 rounded-xl bg-[#111111] border border-[#1f1f1f] items-center">
               <Users size={20} color="#10b981" />
-              <Text className="text-white font-bold text-xl mt-2">{country.studentCount || "—"}</Text>
+              <Text className="text-white font-bold text-xl mt-2">{students.length || country.studentCount || "0"}</Text>
               <Text className="text-gray-500 text-xs">Students</Text>
             </View>
           </View>
@@ -154,7 +161,7 @@ export default function CountryDetailScreen() {
           </View>
           <View className="h-8" />
         </ScrollView>
-      ) : (
+      ) : activeTab === "universities" ? (
         <FlatList
           data={universities}
           keyExtractor={(item, i) => item.$id || String(i)}
@@ -186,6 +193,41 @@ export default function CountryDetailScreen() {
             <View className="items-center py-16">
               <GraduationCap size={40} color="#374151" />
               <Text className="text-gray-500 mt-3">No universities found</Text>
+            </View>
+          }
+        />
+      ) : (
+        <FlatList
+          data={students}
+          keyExtractor={(item, i) => item.$id || String(i)}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => router.push(`/student/${item.$id}` as any)}
+              className="mb-3 p-4 rounded-xl bg-[#111111] border border-[#1f1f1f]"
+            >
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-xl bg-green-500/15 items-center justify-center">
+                  <Users size={18} color="#10b981" />
+                </View>
+                <View className="flex-1 ml-3">
+                  <Text className="text-white font-semibold text-sm" numberOfLines={1}>
+                    {item.firstName} {item.lastName}
+                  </Text>
+                  <Text className="text-gray-500 text-xs mt-1" numberOfLines={1}>
+                    {item.email}
+                  </Text>
+                </View>
+                <View className={`px-2 py-0.5 rounded-full bg-blue-500/10`}>
+                  <Text className="text-[10px] text-blue-400 font-medium uppercase">{item.leadStatus || "New"}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            <View className="items-center py-16">
+              <Users size={40} color="#374151" />
+              <Text className="text-gray-500 mt-3">No students found</Text>
             </View>
           }
         />
